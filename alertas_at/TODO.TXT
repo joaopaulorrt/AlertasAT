@@ -1,0 +1,46 @@
+"""Módulo principal do Sistema de Alertas de Acidentes do Trabalho (SAAT)"""
+
+"""
+Checa usuários inscritos no Google forms
+    Download usuários cadastrados
+    Download usuários descadastrados
+    Compara usuários cadastrados e descadastrados
+
+Tenta conectar à VPN
+    Em caso de erro, raise exception
+    
+Baixa novas CATs e classifica novas CATs
+    Busca no banco de dados do SAAT última CAT baixada
+    Baixa novas CATs    
+        Em caso de erro na conexão, raise exception
+        Se não houver novas CATs, raise exception
+    Classifica novas CATs
+        Graves
+        Fatais
+        etc
+    Atribui UORG e UF às novas CATs
+    Calcula quantidade de novos acidentes (total/graves/fatais)
+        Grava no banco de dados do SAAT
+    Gera o PDF de cada CAT grave ou fatal e salva numa pasta do sistema
+        
+Para cada usuário
+    Gera email, incluindo:
+        Tabela resumo das CAT, para o corpo do e-mail
+        Links para cadastramento e descadastramento
+        PDFs das CATs em anexo
+    Envia o e-mail para cada usuário  
+
+Notifica o coordenador nacional / administrador
+    Eventuais erros
+    Quantidade de novos acidentes (total/graves/fatais/etc)
+    Sucesso no envio dos emails
+    Tabela resumo das CAT, para o corpo do e-mail
+    Tabela resumo dos usuários inscritos
+    
+Banco de dados
+    
+    CATs já alertadas - recibo / data emissão / data acidente
+    Execuções -  Timestamp / sucesso / inscritos / Última CAT baixada (se sucesso) / Quantidade de novos acidentes notificados
+    envios - Timestamp / email / Recibo
+
+"""

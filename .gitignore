@@ -1,0 +1,13 @@
+# Project
+/data/log/
+/data/output/
+/experimental/
+teste.py
+test.ipynb
+
+# Clutter
+/venv/
+/.idea/
+/.git/
+Pipfile
+Pipfile.lock
