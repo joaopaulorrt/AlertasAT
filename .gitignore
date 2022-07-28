@@ -2,8 +2,6 @@
 /data/log/
 /data/output/
 /experimental/
-teste.py
-test.ipynb
 
 # Clutter
 /venv/
