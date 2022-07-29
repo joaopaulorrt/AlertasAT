@@ -5,22 +5,6 @@ import pandas as pd
 from datetime import timedelta
 
 
-def lista_usuarios(spreadsheet_id_inscricao: str, spreadsheet_id_cancel: str) -> pd.DataFrame:
-    """Importa as inscrições e cancelamentos do Google Drive e compila a lista de usuários
-
-    Args:
-        spreadsheet_id_inscricao: ID da Google spreadsheet com os dados das inscrições, obtida através da URL.
-        spreadsheet_id_cancel: ID da Google spreadsheet com os dados dos cancelamentos, obtida através da URL.
-
-    Returns:
-        Pandas DataFrame, com as inscrições válidas
-    """
-    inscricoes = import_google_spreadsheet(spreadsheet_id_inscricao)
-    cancelamentos = import_google_spreadsheet(spreadsheet_id_cancel)
-
-    return compila_inscricoes(df_inscricao=inscricoes, df_cancelamento=cancelamentos)
-
-
 def import_google_spreadsheet(spreadsheet_id: str, sheetname: str = 'sheet1') -> pd.DataFrame:
     """Importa dados de uma spreadsheet do Google para uma pandas DataFrame.
     Obs.: Todas as colunas são importadas como objeto.
