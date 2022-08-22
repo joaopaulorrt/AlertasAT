@@ -1,8 +1,10 @@
 # Project
 /data/log/
 /data/output/
+/data/backup/
 /experimental/
 /config/secrets.yaml
+/notebooks
 
 # Clutter
 /venv/
