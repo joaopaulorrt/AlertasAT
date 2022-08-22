@@ -2,6 +2,7 @@
 /data/log/
 /data/output/
 /experimental/
+/config/secrets.yaml
 
 # Clutter
 /venv/

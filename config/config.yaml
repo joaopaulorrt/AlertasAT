@@ -1,0 +1,29 @@
+---
+# Diretório raiz do projeto
+
+# Formulário de inscrição
+FORM_INSC: {ID_GSHEET: '1BGNomIEkIgiPaPbMpeCArVCpERKK9TGHYFyT4Mt9grk',
+            COLS: ['Timestamp', 'E-mail', 'Consequência do acidente', 'Abrangência geográfica',
+                   'UF', 'UORG', 'Tipo de acidente', 'Setores econômicos', 'Seção CNAE',
+                   'Fator de risco', 'Fatores de risco'],
+            LINK: 'https://forms.gle/eGjE2vTw8ngeNCBGA'}
+
+# Planilha com os dados para popular o formulário de inscrição
+FORM_INSC_OPCOES: {ID_GSHEET: '1e4HI1t4aVx98ZqEBjFI75hxX-wysZkt3Zqea6b1c40k',
+
+                   # Link com planilha utilizada como base para popular os campos do dicionário de inscrição
+                   LINK: 'https://docs.google.com/spreadsheets/d/1e4HI1t4aVx98ZqEBjFI75hxX-wysZkt3Zqea6b1c40k/edit#gid=0',
+
+                   # Link com o script utilizado para popular, de forma automática, os campos do formulário de inscrição,
+                   # com base na planilha do link apontado pela variável OPCOES_INSCRICAO'
+                   LINK_SCRIPT: 'https://script.google.com/u/0/home/projects/1fFtDuIgWZAaDvpMthyMqNjTJXkxr1SMBmp9cQnek2fkyAd7Ej7d58-zR/edit'}
+
+# Formulário Cancelamento da inscrição
+FORM_CANCEL: {ID_GSHEET: '1bNqrMwDAPVNG8YxzEJt6sZNmtO9xEdHjIvDUw8c_oyY',
+              COLS: ['Timestamp', 'E-mail'],
+              LINK: 'https://forms.gle/bwHyvjMCGYkHZMPU7'}
+
+# VPN
+VNP_PATH: 'C:\Program Files\Fortinet\FortiClient\FortiClient.exe'  # Barras devem ser no estilo do windows
+VPN_URL_TEST_CONNECTION: 'https://gitlab.sit.trabalho.gov.br/'
+...

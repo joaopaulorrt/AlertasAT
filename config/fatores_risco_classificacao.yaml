@@ -1,0 +1,230 @@
+---
+fatores_params : {
+    '111':  # Temperatura ambiental alta/baixa
+        {'codsitgeradora': ['200044300', '200044600'],
+         'codagntcausador': ['354050300'],
+         'dsclesao': ['702055000'],
+         'codcid': ['Z576'],
+         'codcidCategoria': ['T67-T69', 'W92', 'W93', 'X30', 'X31', 'T95'],
+         'codcid_not': []},
+
+    '121':  # Contato com temperatura alta/baixa
+        {'codsitgeradora': ['200040300', '200040600'],
+         'codagntcausador': ['303060000', '354040000'],
+         'dsclesao': ['702040000', '702048000'],
+         'codcid': [],
+         'codcidCategoria': ['T20-T31', 'T33-T35', 'X10-X15', 'X17-X19'],
+         'codcid_not': ['T204-T207', 'T214-T217', 'T224-T227', 'T234-T237',
+                       'T244-T247', 'T254-T257', 'T265-T269', 'T274-T277',
+                       'T285-T289', 'T294-T297', 'T304-T307', 'T320-T329']},
+
+    '131':  # Radiação não ionizante
+        {'codsitgeradora': ['200056000'],
+         'codagntcausador': ['303065000', '303065300', '303065900'],
+         'dsclesao': ['702045000', '704070000'],
+         'codcid': [],
+         'codcidCategoria': ['L55', 'L56', 'L57', 'X32', 'W89', 'W90'],
+         'codcid_not': []},
+
+    '132':  # Radiação ionizante
+        {'codsitgeradora': ['200060000'],
+         'codagntcausador': ['303070200', '303070400', '303070600'],
+         'dsclesao': [],
+         'codcid': ['J700', 'J701', 'K520', 'K627', 'L598', 'L599',
+                   'M962', 'M965', 'N304', 'O356', 'Z571', 'Z584'],
+         'codcidCategoria': ['L58', 'T66', 'J82', 'W88', 'W91'],
+         'codcid_not': []},
+
+    '141':  # Pressão ambiente
+        {'codsitgeradora': ['200072000', '200072300', '200072600'],
+         'codagntcausador': ['303055200', '303055400', '303055600',
+                              '303055900', '354010300', '354010600'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['T70'],
+         'codcid_not': []},
+
+    '151':  # Ruído
+        {'codsitgeradora': ['200064000'],
+         'codagntcausador': ['354020000'],
+         'dsclesao': [],
+         'codcid': ['H833', 'H932', 'S092', 'Z570', 'Z580'],
+         'codcidCategoria': ['H60-H62', 'H65-H75', 'H80-H83', 'H90-H95', 'W42'],
+         'codcid_not': []},
+
+    '161':  # Vibração
+        {'codsitgeradora': ['200068000'],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': ['L504', 'T752'],
+         'codcidCategoria': ['W43'],
+         'codcid_not': []},
+
+    '211':  # Químicos / Poluição / Poeira
+        {'codsitgeradora': ['200048200', '200048400', '200048600', '200048900',
+                                '200076200', '200076400', '200076600', '200076900'],
+         'codagntcausador': ['305004100', '305004150', '305004200', '305004250',
+                              '305004300', '305004350', '305004400', '305004450',
+                              '305004500', '305004550', '305004600', '305004650',
+                              '305004700', '305004750', '305004900', '355016000',
+                              '305020000'],
+         'dsclesao': ['702042000', '704030000', '704040000', '704050000'],
+         'codcid': ['T204-T207', 'T214-T217', 'T224-T227', 'T234-T237',
+                   'T244-T247', 'T254-T257', 'T265-T269', 'T274-T277',
+                   'T285-T289', 'T294-T297', 'T304-T307', 'T320-T329',
+                   'Z572-Z573', 'Z581-Z583'],
+         'codcidCategoria': ['J40-J47', 'J60-J64', 'J66-J70', 'J80-J81', 'J96',
+                            'J98', 'J99', 'L20-L30', 'L50-L54', 'T36-T42', 'T44-T65', 'T96-T97',
+                            'X40-X49', 'Y10-Y14', 'Y16-Y19', 'Y40-Y59', 'Y97'],
+         'codcid_not': ['L504']},
+
+    '311':  # Material infecto-contagiante / Pessoas doentes
+        {'codsitgeradora': ['200080901'],
+         'codagntcausador': ['306060000'],
+         'dsclesao': ['704020000'],
+         'codcid': [],
+         'codcidCategoria': ['A00-B99', 'J00-J06', 'J09-J18', 'J65', 'L01', 'Z20-Z29'],
+         'codcid_not': []},
+
+    '411':  # Energia elétrica
+        {'codsitgeradora': ['200036000'],
+         'codagntcausador': ['303040200', '303040300', '303040400', '303040500',
+                              '303040700', '303040750', '303040900', '303065600',
+                              '303066600'],
+         'dsclesao': ['702060000'],
+         'codcid': ['T754'],
+         'codcidCategoria': ['W85', 'W86', 'W87'],
+         'codcid_not': []},
+
+    '511':  # Ergonômicos
+        {'codsitgeradora': ['200032200', '200032400', '200032600', '200032900'],
+         'codagntcausador': [],
+         'dsclesao': ['702025000', '702065000'],
+         'codcid': [],
+         'codcidCategoria': ['G54-G59', 'S13', 'S53', 'S63', 'M00-M99', 'K40-K46'],
+         'codcid_not': []},
+
+    '611':  # Máquinas e equipamentos
+        {'codsitgeradora': [],
+         'codagntcausador': ['303015050', '303015100', '303015150', '303015200',
+                              '303015250', '303015300', '303015350', '303015400',
+                              '303015450', '303015500', '303015550', '303015600',
+                              '303015650', '303015700', '303015750', '303015900',
+                              '303020040', '303020080', '303020120', '303020160',
+                              '303020200', '303020240', '303020280', '303020320',
+                              '303020360', '303020400', '303020440', '303020480',
+                              '303020520', '303020560', '303020600', '303020640',
+                              '303020680', '303020720', '303020760', '303020900',
+                              '303025300', '303025600', '303025900', '303035300',
+                              '303035400', '303035500', '303035600', '303035700',
+                              '303035900', '303040100', '303040600', '303040800',
+                              '303045200', '303045400', '303045600', '303045900',
+                              '303066300', '303090000'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W24', 'W28', 'W29', 'W31'],
+         'codcid_not': []},
+
+    '612':  # Ferramenta manual sem força motriz
+        {'codsitgeradora': [],
+         'codagntcausador': ['303010040', '303010080', '303010120', '303010160',
+                              '303010200', '303010240', '303010280', '303010320',
+                              '303010360', '303010400', '303010440', '303010480',
+                              '303010520', '303010560', '303010600', '303010640',
+                              '303010680', '303010720', '303010760', '303010800',
+                              '303010900'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W26', 'W27'],
+         'codcid_not': []},
+
+    '613':  # Equipamento de guindar
+        {'codsitgeradora': [],
+         'codagntcausador': ['303030050', '303030100', '303030150', '303030200',
+                              '303030250', '303030300', '303030350', '303030400',
+                              '303030450', '303030500', '303030900'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': [],
+         'codcid_not': []},
+
+    '614':  # Caldeira, vaso sob pressão
+        {'codsitgeradora': [],
+         'codagntcausador': ['303050200', '303050400', '303050600', '303050900'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W35'],
+         'codcid_not': []},
+
+    '615':  # Veículo
+        {'codsitgeradora': [],
+         'codagntcausador': ['303075100', '303075150', '303075200', '303075250',
+                              '303075300', '303075350', '303075400', '303075450',
+                              '303075500', '303075550', '303075600', '303075650',
+                              '303075700', '303075750', '303075800', '303075900'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['V01-V89', 'V91', 'V93-V99', 'Y03', 'Y32', 'Y85'],
+         'codcid_not': []},
+
+    '621':  # Queda de pessoa com diferença de nível
+        {'codsitgeradora': ['200012200', '200012300', '200012400', '200012500',
+                                '200012600', '200012700', '200012900'],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W06-W15', 'W19'],
+         'codcid_not': []},
+
+    '622':  # Queda de pessoa em mesmo nível
+        {'codsitgeradora': ['200016300', '200016600', '200016900'],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W00', 'W01', 'W02', 'W05'],
+         'codcid_not': []},
+
+    '631':  # Queda de materiais
+        {'codsitgeradora': ['200008300'],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['W20'],
+         'codcid_not': []},
+
+    '641':  # Desabamento / Desmoronamento
+        {'codsitgeradora': ['200020700'],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['X36'],
+         'codcid_not': []},
+
+    '651':  # Afogamento / Soterramento / Asfixia
+        {'codsitgeradora': ['200052000'],
+         'codagntcausador': [],
+         'dsclesao': ['702050000'],
+         'codcid': ['T751'],
+         'codcidCategoria': ['T71', 'V90', 'V92', 'W65-W74', 'W75-W84', 'Y21'],
+         'codcid_not': []},
+
+    '661':  # Ataque de ser vivo
+        {'codsitgeradora': ['200080200', '200080400', '200080600', '200080900'],
+         'codagntcausador': ['306020000'],
+         'dsclesao': [],
+         'codcid': [],
+         'codcidCategoria': ['X20-X29', 'W53', 'W54', 'W55', 'W56', 'W57', 'W58', 'W59'],
+         'codcid_not': []},
+
+    '711':  # Psicossociais
+        {'codsitgeradora': [],
+         'codagntcausador': [],
+         'dsclesao': [],
+         'codcid': ['G312', 'G720', 'G721', 'K292', 'K700', 'K701', 'K702',
+                   'K703', 'K704', 'K709', 'Z502', 'Z503', 'Z504'],
+         'codcidCategoria': ['F00-F99', 'R78', 'T43', 'X60-X84', 'Y15', 'Y90',
+                            'Y91', 'Z55-Z65', 'Z70', 'Z71', 'Z72', 'Z73', 'Z74',
+                            'Z75', 'Z76', 'Z80', 'Z81'],
+         'codcid_not': []},
+    }
+...

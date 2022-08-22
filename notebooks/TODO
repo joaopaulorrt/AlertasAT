@@ -35,6 +35,5 @@ Notifica o coordenador nacional / administrador
 
 Fim da execução
     Registra no LOG
-        envios - Timestamp / email / Recibo
-        CATs já alertadas - recibo / data emissão / data acidente
+        envios - Timestamp / email / Recibo / data emissão / data acidente
         Execuções -  Timestamp / sucesso / inscritos / Última CAT baixada (se sucesso) / Quantidade de novos acidentes notificados
