@@ -4,6 +4,11 @@ import pandas as pd
 from datetime import datetime, timedelta
 import sqlalchemy
 import numpy as np
+import os
+from pathlib import Path
+from jinja2 import Template
+import weasyprint
+import shutil
 from . import helpers_consequencia
 
 
@@ -13,7 +18,7 @@ def cat_extrair() -> pd.DataFrame:
     Returns:
         DataFrame com os dados das novas CATs
     """
-    sete_dias_atras = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')
+    sete_dias_atras = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
     dt_ultima_cat = None  # TODO buscar no banco de dados
 
     query = f"""
@@ -35,6 +40,24 @@ def cat_extrair() -> pd.DataFrame:
 
 def cat_eliminar_ja_alertadas(df_cat: pd.DataFrame) -> pd.DataFrame:  # TODO
     df = df_cat.copy()
+
+    return df
+
+
+def cat_converter_inteiros(df_cat: pd.DataFrame):
+    """Converte as colunas apropriadas de 'string' para 'int'
+
+    Args:
+        df_cat: DataFrame com os dados das CATs.
+
+    Returns:
+        DataFrame com os dados CATs tratados
+    """
+    df = df_cat.copy()
+
+    cols_to_convert = ['durtrat']
+    for col in cols_to_convert:
+        df[col] = df[col].astype(int)
 
     return df
 
@@ -117,6 +140,7 @@ def cat_novas_colunas(df_cat: pd.DataFrame):
     df['CDEmitenteCAT'] = '1'
     df['NRCAT'] = df['meta_nr_recibo']
     df['codcidCategoria'] = df['codcid'].str[:3]
+    df['ultdiatrab'] = np.NAN
     return df
 
 
@@ -132,7 +156,30 @@ def cat_uorg_local_acidente(df_cat: pd.DataFrame):
     df = df_cat.copy()
 
     uorgs = pd.read_csv(f'../data/input/aux_tables/uorg.csv', dtype='object').set_index('CDMunicipio').to_dict()['NRUORG']
+    uf_uorgs = pd.read_csv(f'../data/input/aux_tables/uf_uorg.csv', dtype='object').set_index('CDUORG').to_dict()['SGUF']
+
     df['uorg_local_acidente'] = df['municipio_local_acidente'].map(uorgs)
+    df['uf_uorg_local_acidente'] = df['uorg_local_acidente'].map(uf_uorgs)
+
+    return df
+
+
+def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame):
+    """Insere o código da Seção da CNAE do local do acidente.
+
+    Args:
+        df_cat: DataFrame com os dados das CATs.
+
+    Returns:
+        DataFrame com os dados CATs tratados
+    """
+    df = df_cat.copy()
+
+    secao_cnae = (pd.read_csv(f'../data/input/aux_tables/cnae_secao.csv', dtype='object')
+                  .set_index('CDSubclasse')
+                  .to_dict()['CDSecao'])
+
+    df['secao_cnae_local_acidente'] = df['cnae_local_acidente'].map(secao_cnae)
 
     return df
 
@@ -340,5 +387,28 @@ def cat_inserir_descricoes(df_cat: pd.DataFrame):
     return df
 
 
-def cat_to_html(df_cat: pd.DataFrame):  # TODO
-    pass
+def cat_to_pdf(series: pd.Series,
+               html_template: Path,
+               logo: Path,
+               output_dir: Path | None = None):
+    nr_recibo = series.meta_nr_recibo
+
+    html_path = output_dir / f'{nr_recibo}.html' if output_dir else f'{nr_recibo}.html'
+    pdf_path = output_dir / f'{nr_recibo}.pdf' if output_dir else f'{nr_recibo}.pdf'
+
+    if not os.path.isfile(output_dir / logo.name):
+        shutil.copy(logo, output_dir / logo.name)
+
+    if not os.path.isfile(pdf_path):
+        series = series.fillna('N/A')
+
+        with open(html_template, 'r', encoding='utf-8') as f:
+            template = Template(f.read())
+
+        cat_html = template.render({col: series[col] for col in series.index} | {'logo_path': logo.name})
+        with open(html_path, 'w') as file:
+            file.write(cat_html)
+
+        weasyprint.HTML(html_path).write_pdf(pdf_path)
+
+        os.remove(html_path)

@@ -6,9 +6,7 @@ from src.utils import read_yaml
 
 # Importa configurações do sistema
 cfg = read_yaml('config/config.yaml')
-fatores_risco_inativos = read_yaml('config/fatores_risco_inativos.yaml')
-consequencia_inativos = read_yaml('config/consequencia_inativos.yaml')
-uorg_inativos = read_yaml('config/uorg_inativos.yaml')
+codigos_desativados = read_yaml('config/codigos_desativados_conversao.yaml')
 
 
 class TestCompilaInscricoes:
@@ -95,26 +93,31 @@ class TestInscricao:
 
         df_valid_values = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
         valid_values_uorg = set(df_valid_values.UORG.str.extract(r'([0-9]{9})', expand=False).dropna().to_list())
-        valid_values_uorg_including_deprecated = valid_values_uorg | uorg_inativos.keys()
 
         inscricoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC']['ID_GSHEET'])
+        inscricoes_cd_atualizados = usuarios.update_codigos_desativados(inscricoes, codigos_desativados)
 
-        values_uorg = set(inscricoes['UORG'].str.extract(r'([0-9]{9})', expand=False).dropna().unique())
+        values_uorg = set(inscricoes_cd_atualizados['UORG'].str.extract(r'([0-9]{9})', expand=False).dropna().unique())
 
-        assert values_uorg.issubset(valid_values_uorg_including_deprecated)
+        assert values_uorg.issubset(valid_values_uorg)
 
     def test_insc_consequencia_validation(self):
         """Testa se os valores na coluna 'Consequência do acidente' dos dados de inscrição são válidos"""
 
         df_valid_values = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
         valid_values_consequencia = set(df_valid_values['Consequência do acidente'].dropna().to_list())
-        # valid_values_consequencia_including_deprecated = valid_values_consequencia | consequencia_inativos.keys()
-        # Todo fazer a conversão antes de checar valid values
+
         inscricoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC']['ID_GSHEET'])
+        inscricoes_cd_atualizados = usuarios.update_codigos_desativados(inscricoes, codigos_desativados)
 
-        values_consequencia = set(inscricoes['Consequência do acidente'].str.split(', ').explode().dropna().unique())
+        values_consequencia = set(inscricoes_cd_atualizados['Consequência do acidente']
+                                  .str
+                                  .split(', ')
+                                  .explode()
+                                  .dropna()
+                                  .unique())
 
-        assert values_consequencia.issubset(valid_values_consequencia_including_deprecated)
+        assert values_consequencia.issubset(valid_values_consequencia)
 
     def test_insc_cnae_validation(self):
         """Testa se os valores na coluna 'Seção CNAE' dos dados de inscrição são válidos"""
@@ -133,10 +136,15 @@ class TestInscricao:
 
         df_valid_values = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
         valid_values_risco = set(df_valid_values['Fatores de risco'].str.extract(r'([0-9]{3})', expand=False).dropna().to_list())
-        valid_values_risco_including_deprecated = valid_values_risco | fatores_risco_inativos.keys()
 
         inscricoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC']['ID_GSHEET'])
+        inscricoes_cd_atualizados = usuarios.update_codigos_desativados(inscricoes, codigos_desativados)
 
-        values_risco = set(inscricoes['Fatores de risco'].str.findall(r'([0-9]{3})').explode().dropna().unique())
+        values_risco = set(inscricoes_cd_atualizados['Fatores de risco']
+                           .str
+                           .findall(r'([0-9]{3})')
+                           .explode()
+                           .dropna()
+                           .unique())
 
-        assert values_risco.issubset(valid_values_risco_including_deprecated)
+        assert values_risco.issubset(valid_values_risco)

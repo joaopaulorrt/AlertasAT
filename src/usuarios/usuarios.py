@@ -46,3 +46,18 @@ def compila_inscricoes(df_inscricao: pd.DataFrame, df_cancelamento: pd.DataFrame
     compilado['vigente'] = (compilado.intervalo < timedelta(microseconds=0)) | (compilado.intervalo.isna())
 
     return compilado[compilado.vigente == 1]
+
+
+def update_codigos_desativados(usuarios: pd.DataFrame, codigos_desativados: dict) -> pd.DataFrame:
+    df = usuarios.copy()
+
+    cols_to_update = ['Consequência do acidente', 'UORG', 'Fatores de risco']
+    dict_update = [codigos_desativados['CONSEQUENCIA'],
+                   codigos_desativados['UORG'],
+                   codigos_desativados['FATOR_RISCO']]
+
+    for col, dict_conversao in zip(cols_to_update, dict_update):
+        for antigo, novo in dict_conversao.items():
+            df[col] = df[col].str.replace(antigo, novo, regex=False)
+
+    return df

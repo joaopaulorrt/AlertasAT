@@ -12,7 +12,7 @@ def test_fator_risco():
 
     # Importa parâmetros para aplicação da função
     root_dir = Path().resolve()
-    fatores_params = read_yaml(root_dir / 'config/fatores_risco_classificacao.yaml')['fatores_params']
+    fatores_params = read_yaml(root_dir / 'config/fatores_risco_classificacao.yaml')
     fatores_params_reshaped = acidentes.reshape_fatores_params(fatores_params)
 
     # Cria função partial, informando o dicionário de parâmetros
