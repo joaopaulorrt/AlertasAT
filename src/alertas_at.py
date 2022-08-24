@@ -24,8 +24,10 @@ if __name__ == '__main__':
 
     # Indica diretórios e arquivos a serem utilizados
     cat_html_template = Path('../data/input/html_templates/cat.html')
+    alerta_user_html_template = Path('../data/input/html_templates/alerta_usuario.html')
     logo_sit = Path('../data/input/images/logoSIT.png')
     output_dir_cat_pdf = Path('../data/output/cat_pdf')
+    log_dir = Path('../data/log')
 
     # Importa dados que populam as opções do formulário de inscrição
     opcoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
@@ -46,8 +48,8 @@ if __name__ == '__main__':
 
     # Tenta conectar à VPN
     vpn.try_connection_forticlient_vpn(vpn_path=cfg['VNP_PATH'],
-                                       user=secrets['VNP_USER'],
-                                       password=secrets['VNP_PASSWORD'],
+                                       user=secrets['USER'],
+                                       password=secrets['PASSWORD'],
                                        url_test_connection=cfg['VPN_URL_TEST_CONNECTION'])
 
     # Importa novas CATs
@@ -94,12 +96,13 @@ if __name__ == '__main__':
 
     cats_filtradas = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial, cats_tratadas)
 
-    # Gera PDF das CAT
-    for cat in cats_filtradas.index:
-        acidentes.cat_to_pdf(cats_filtradas.loc[cat],
-                             html_template=cat_html_template,
-                             logo=logo_sit,
-                             output_dir=output_dir_cat_pdf)
+    if not cats_filtradas.empty:
+        # Gera PDF das CAT
+        for cat in cats_filtradas.index:
+            acidentes.cat_to_pdf(cats_filtradas.loc[cat],
+                                 html_template=cat_html_template,
+                                 logo=logo_sit,
+                                 output_dir=output_dir_cat_pdf)
 
         # Encaminha email
         # Registra no log (Timestamp / email / Recibo / data emissão / data acidente)

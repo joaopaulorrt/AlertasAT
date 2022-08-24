@@ -406,9 +406,9 @@ def cat_to_pdf(series: pd.Series,
             template = Template(f.read())
 
         cat_html = template.render({col: series[col] for col in series.index} | {'logo_path': logo.name})
-        with open(html_path, 'w') as file:
+        with open(html_path, 'w', encoding="utf-8") as file:
             file.write(cat_html)
 
-        weasyprint.HTML(html_path).write_pdf(pdf_path)
+        weasyprint.HTML(html_path, encoding="utf-8").write_pdf(pdf_path)
 
         os.remove(html_path)

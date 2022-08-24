@@ -26,4 +26,11 @@ FORM_CANCEL: {ID_GSHEET: '1bNqrMwDAPVNG8YxzEJt6sZNmtO9xEdHjIvDUw8c_oyY',
 # VPN
 VNP_PATH: 'C:\Program Files\Fortinet\FortiClient\FortiClient.exe'  # Barras devem ser no estilo do windows
 VPN_URL_TEST_CONNECTION: 'https://gitlab.sit.trabalho.gov.br/'
+
+# Servidor SMTP
+SMPT_SERVER: 'smtp.office365.com'
+PORT: 587
+
+# Remetente
+SENDER_EMAIL: 'cgfip.dsst@economia.gov.br'
 ...

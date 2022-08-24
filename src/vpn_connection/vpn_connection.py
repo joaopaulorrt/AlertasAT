@@ -30,9 +30,9 @@ def try_connection_forticlient_vpn(vpn_path: str, user: str, password: str, url_
             attempts += 1
             print("Falha ao tentar conectar à VPN")
             if attempts >= max_attempts:
-                class MyException(Exception):
+                class MaxNumberTries(Exception):
                     pass
-                raise MyException("Excedido o número máximo de tentativas de conectar à VPN")
+                raise MaxNumberTries("Excedido o número máximo de tentativas de conectar à VPN")
 
 
 def _connect_forticlient_vpn(vpn_path: str, user: str, password: str):
