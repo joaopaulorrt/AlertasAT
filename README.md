@@ -1,37 +1,20 @@
 # Serviço de Alerta de Acidentes do Trabalho
 
-O pacote alertas_at envia alertas diários sobre a ocorrência de acidentes do trabalho aos por e-mail aos 
-Auditores-Fiscais do Trabalho cadastrados. Os alertas podem ser customizados pelo usuário, que pode definir a
-abrangência geográfica e o perfil dos acidentes do trabalho para os quais serão enviados os alertas.
+Envia alertas diários sobre a ocorrência de acidentes do trabalho aos Auditores-Fiscais do Trabalho cadastrados. 
 
-## Usage
+Os alertas podem ser customizados pelo usuário, que pode definir a abrangência geográfica e o perfil dos 
+acidentes do trabalho para os quais serão enviados os alertas. 
 
-```python
-import foobar
+[Link para cadastro](https://forms.gle/eGjE2vTw8ngeNCBGA)
 
-# returns 'words'
-foobar.pluralize('word')
+[Link para cancelamento](https://forms.gle/eGjE2vTw8ngeNCBGA)
 
-# returns 'geese'
-foobar.pluralize('goose')
+## Histórico de lançamentos
 
-# returns 'phenomenon'
-foobar.singularize('phenomena')
-```
-
-## Configurações necessárias
-O que deve ser instalado (weasyprint)
-
-## Histórico de lançamentos'
-
-* 0.1.0
-    * Lançamento do serviço, com as seguintes características
-        * tipos de acidentes / customizações 
-        * usuários atingidos       
-        * forma de notificação (anexo) 
+* 0.1.0 - Lançamento do serviço, em caráter experimental
 
 ## Meta
 
-João Paulo Reis Ribeiro Teixeira – joao.reis@economia.gov.br
+Autor: João Paulo Reis Ribeiro Teixeira – joao.reis@economia.gov.br
 
 [https://github.com/joaopaulorrt/](https://github.com/joaopaulorrt/)

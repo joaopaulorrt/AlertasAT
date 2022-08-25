@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>       
+        
+        p {
+            font-size:11pt;
+            }
+        
+        p.rodape {
+            font-size:10.5pt;
+            margin-top: 0;
+            margin-bottom: 0;
+            }
+        
+        html, body {
+            min-height:100%;
+            }
+        
+        table {
+            border-collapse: collapse;
+            font-family: Tahoma, Geneva, sans-serif;            
+            font-size: 13px;
+        }
+        
+        table td {
+            padding: 5px;
+        }
+        
+        table thead th {
+            background-color: #113167;
+            color: #ffffff;
+            font-weight: bold;
+            border: 1px solid #FFFFFF;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        table tbody td {
+            color: #636363;
+            border: 1px solid #dddfe1;
+            text-align: left;
+        }
+        
+        table tbody tr {
+            background-color: #f0f2f5;
+        }
+        
+        table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        
+    </style>
+
+</head>
+    
+<body>
+
+    <p><img height=90 src="cid:logoSAAT_email.png"></p>
+    {{ cats }}
+    <br>
+    
+    <p><b>Suas preferências</b><br>
+        <b>UF:</b> {{ uf }} <br>
+        <b>UORG:</b> {{ uorg }} <br>
+        <b>Tipo de acidente:</b> {{ tpacid }} <br>
+        <b>Consequência do acidente:</b> {{ consequencia }} <br>
+        <b>Setores econômicos:</b> {{ setores }} <br>
+        <b>Fator de risco:</b> {{ riscos }} <br>
+    </p>
+    
+    <p class="rodape">Para alterar seu perfil ou se inscrever no Serviço de Alerta de Acidentes de Tabalho, clique <a href="https://forms.gle/eGjE2vTw8ngeNCBGA">aqui</a></p>
+    <p class="rodape">Para cancelar o envio de alertas de acidentes de trabalho, clique <a href="https://forms.gle/bwHyvjMCGYkHZMPU7">aqui</a></p>
+
+
+</body>
+</html>
+

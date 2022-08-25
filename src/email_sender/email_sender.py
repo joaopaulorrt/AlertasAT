@@ -11,7 +11,29 @@ from email.mime.application import MIMEApplication
 from jinja2 import Template
 
 
-class EmailMessageHTML:
+class EmailMessage:
+    def __init__(self):
+        self.sender_email = None
+        self.destinatario = None
+        self.message = None
+
+    def send(self,
+             auth_user: str,
+             password: str,
+             smtp_server: str,
+             port: int):
+
+        context = ssl.create_default_context()
+        server = smtplib.SMTP(smtp_server, port)
+        server.ehlo()
+        server.starttls(context=context)
+        server.ehlo()
+        server.login(auth_user, password)
+        server.sendmail(self.sender_email, self.destinatario, self.message.as_string())
+        server.quit()
+
+
+class EmailMessageHTML(EmailMessage):
     def __init__(self,
                  destinatario: str,
                  sender_email: str,
@@ -60,17 +82,21 @@ class EmailMessageHTML:
 
         self.message = message
 
-    def send(self,
-             auth_user: str,
-             password: str,
-             smtp_server: str,
-             port: int):
 
-        context = ssl.create_default_context()
-        server = smtplib.SMTP(smtp_server, port)
-        server.ehlo()
-        server.starttls(context=context)
-        server.ehlo()
-        server.login(auth_user, password)
-        server.sendmail(self.sender_email, self.destinatario, self.message.as_string())
-        server.quit()
+class EmailMessagText(EmailMessage):
+    def __init__(self,
+                 destinatario: str,
+                 sender_email: str,
+                 assunto: str,
+                 conteudo: str):
+        self.destinatario = destinatario
+        self.sender_email = sender_email
+
+        # Create a multipart message
+        message = MIMEMultipart()
+        message["Subject"] = assunto
+        message["From"] = sender_email
+        message["To"] = destinatario
+        message.attach(MIMEText(conteudo, "plain"))
+
+        self.message = message

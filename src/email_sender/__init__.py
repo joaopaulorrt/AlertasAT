@@ -1,1 +1,1 @@
-from .email_sender import EmailMessageHTML
+from .email_sender import EmailMessageHTML, EmailMessagText

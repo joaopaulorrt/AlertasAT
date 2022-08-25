@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def uf(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por UF, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas
@@ -28,7 +28,8 @@ def uf(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
 
 
 def uorg(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por UORG, de acordo com os critérios selecionados pelo usuário no formulário de
+    inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas
@@ -51,7 +52,8 @@ def uorg(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
 
 
 def tpacid(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por tipo de acidente, de acordo com os critérios selecionados pelo usuário no
+    formulário de inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas
@@ -74,7 +76,8 @@ def tpacid(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
 
 
 def consequencias(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por consequência do acidente, de acordo com os critérios selecionados pelo usuário
+    no formulário de inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas
@@ -93,7 +96,8 @@ def consequencias(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
 
 
 def risco(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por fator de risco, de acordo com os critérios selecionados pelo usuário no
+    formulário de inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas
@@ -112,7 +116,8 @@ def risco(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
 
 
 def cnae(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
-    """Filtra a DataFrame de CATs, de acordo com os critérios selecionados pelo usuário no formulário de inscrição
+    """Filtra a DataFrame de CATs por CNAE, de acordo com os critérios selecionados pelo usuário no formulário de
+    inscrição
 
         Args:
             cats: DataFrame contendo as CATs tratadas

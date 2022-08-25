@@ -11,10 +11,10 @@ codigos_desativados = read_yaml('config/codigos_desativados_conversao.yaml')
 
 class TestCompilaInscricoes:
     def test_duplicidade(self):
-        inscricoes = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '2022-07-27 10:00:00'},
-                                   {'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '2022-07-27 10:00:10'}])
+        inscricoes = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '27/07/2022 10:00:00'},
+                                   {'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '27/07/2022 10:00:10'}])
 
-        cancelamentos = pd.DataFrame([{'E-mail': 'rosita.dantas@economia.gov.br', 'Timestamp': '2022-07-27 10:00:10'}])
+        cancelamentos = pd.DataFrame([{'E-mail': 'rosita.dantas@economia.gov.br', 'Timestamp': '27/07/2022 10:00:10'}])
 
         esperado = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br',
                                   'Timestamp_incricao': np.datetime64('2022-07-27T10:00:10'),
@@ -28,10 +28,10 @@ class TestCompilaInscricoes:
         assert_frame_equal(esperado, resultado)
 
     def test_cancelamento(self):
-        inscricoes = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '2022-07-27 10:00:00'},
-                                   {'E-mail': 'rosita.dantas@economia.gov.br', 'Timestamp': '2022-07-27 10:00:10'}])
+        inscricoes = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '27/07/2022 10:00:00'},
+                                   {'E-mail': 'rosita.dantas@economia.gov.br', 'Timestamp': '27/07/2022 10:00:10'}])
 
-        cancelamentos = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '2022-07-27 10:00:30'}])
+        cancelamentos = pd.DataFrame([{'E-mail': 'joao.reis@economia.gov.br', 'Timestamp': '27/07/2022 10:00:30'}])
 
         esperado = pd.DataFrame([{'E-mail': 'rosita.dantas@economia.gov.br',
                                   'Timestamp_incricao': np.datetime64('2022-07-27T10:00:10'),

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>       
+        
+        p {
+            font-size:11pt;
+            margin-top: 0.3em;
+            margin-bottom: 0.3em;
+            }
+        
+        html, body {
+            min-height:100%;
+            }
+        
+        table {
+            border-collapse: collapse;
+            font-family: Tahoma, Geneva, sans-serif;            
+            font-size: 13px;
+        }
+        
+        table td {
+            padding: 5px;
+        }
+        
+        table thead th {
+            background-color: #113167;
+            color: #ffffff;
+            font-weight: bold;
+            border: 1px solid #FFFFFF;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        table tbody td {
+            color: #636363;
+            border: 1px solid #dddfe1;
+            text-align: left;
+        }
+        
+        table tbody tr {
+            background-color: #f0f2f5;
+        }
+        
+    </style>
+
+</head>
+    
+<body>
+
+    <p><img height=90 src="cid:logoSAAT_email.png"></p>
+    <p><b> Acidentes típicos e doenças do trabalho com óbito </b></p>
+        
+    {{ cats }}
+    <br>
+    
+    <p><b>Usuários ativos</b></p>
+    {{ resumo_notificacoes }}
+
+</body>
+</html>
+

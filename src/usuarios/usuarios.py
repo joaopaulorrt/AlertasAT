@@ -48,6 +48,15 @@ def compila_inscricoes(df_inscricao: pd.DataFrame, df_cancelamento: pd.DataFrame
     return compilado[compilado.vigente == 1]
 
 
+def adiciona_uf_uorgs(usuarios: pd.DataFrame) -> pd.DataFrame:
+    df = usuarios.copy()
+
+    df['uf_uorg'] = df.UORG.str.extract(r'^([A-Z]{2})\s-')
+    df['UF'] = df.UF.fillna(df.uf_uorg)
+
+    return df
+
+
 def update_codigos_desativados(usuarios: pd.DataFrame, codigos_desativados: dict) -> pd.DataFrame:
     df = usuarios.copy()
 

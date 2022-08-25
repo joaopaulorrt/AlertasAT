@@ -10,6 +10,8 @@ from jinja2 import Template
 import weasyprint
 import shutil
 from . import helpers_consequencia
+from .helpers_format_identificadores import (format_cnae, format_cbo, format_nrinsc, format_cpf,
+                                             format_localtabgeral_nrinsc, format_nrinsc_estab_local_acidente)
 
 
 def cat_extrair() -> pd.DataFrame:
@@ -18,15 +20,25 @@ def cat_extrair() -> pd.DataFrame:
     Returns:
         DataFrame com os dados das novas CATs
     """
-    sete_dias_atras = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
-    dt_ultima_cat = None  # TODO buscar no banco de dados
+    log_execucoes_path = Path('../data/log/log_execucoes.csv')
+    if os.path.exists(log_execucoes_path):
+        log_execucoes = pd.read_csv(log_execucoes_path)
+        ultima_cat = log_execucoes.ultima_cat_baixada.fillna('').max()
+        query = f"""
 
-    query = f"""
+            SELECT *
+            FROM [DBCAT].[dbo].[TBCAT_eSocial]
+            WHERE meta_nr_recibo > '{ultima_cat}'
+            """
 
-        SELECT *
-        FROM [DBCAT].[dbo].[TBCAT_eSocial]
-        WHERE LEFT(meta_row_key, 8) >= {dt_ultima_cat if dt_ultima_cat else sete_dias_atras}
-        """
+    else:
+        sete_dias_atras = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
+        query = f"""
+    
+            SELECT *
+            FROM [DBCAT].[dbo].[TBCAT_eSocial]
+            WHERE LEFT(meta_row_key, 8) >= {sete_dias_atras}
+            """
 
     connection_url = sqlalchemy.engine.URL.create("mssql+pyodbc",
                                                   host="MARFIM",
@@ -38,13 +50,7 @@ def cat_extrair() -> pd.DataFrame:
     return pd.read_sql_query(query, connection_engine)
 
 
-def cat_eliminar_ja_alertadas(df_cat: pd.DataFrame) -> pd.DataFrame:  # TODO
-    df = df_cat.copy()
-
-    return df
-
-
-def cat_converter_inteiros(df_cat: pd.DataFrame):
+def cat_converter_inteiros(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Converte as colunas apropriadas de 'string' para 'int'
 
     Args:
@@ -62,7 +68,7 @@ def cat_converter_inteiros(df_cat: pd.DataFrame):
     return df
 
 
-def cat_converter_datas(df_cat: pd.DataFrame):
+def cat_converter_datas(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Converte as colunas com datas de 'string' para 'date'
 
     Args:
@@ -80,7 +86,7 @@ def cat_converter_datas(df_cat: pd.DataFrame):
     return df
 
 
-def cat_formatar_horas(df_cat: pd.DataFrame):
+def cat_formatar_horas(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Formata as strings relativas a horas.
 
     Args:
@@ -98,7 +104,7 @@ def cat_formatar_horas(df_cat: pd.DataFrame):
     return df
 
 
-def cat_formatar_strings(df_cat: pd.DataFrame):
+def cat_formatar_strings(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Remove os espaços em branco no início e fim das colunas contendo string.
     Args:
         df_cat: DataFrame com os dados das CATs.
@@ -111,7 +117,7 @@ def cat_formatar_strings(df_cat: pd.DataFrame):
     return df
 
 
-def cat_cid_uppercase(df_cat: pd.DataFrame):
+def cat_cid_uppercase(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Converte para letras maiúsculas as strings da coluna contendo código CID.
 
     Args:
@@ -125,7 +131,7 @@ def cat_cid_uppercase(df_cat: pd.DataFrame):
     return df
 
 
-def cat_novas_colunas(df_cat: pd.DataFrame):
+def cat_novas_colunas(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Cria algumas novas colunas na DataFrame das CATs.
 
     Args:
@@ -144,7 +150,7 @@ def cat_novas_colunas(df_cat: pd.DataFrame):
     return df
 
 
-def cat_uorg_local_acidente(df_cat: pd.DataFrame):
+def cat_uorg_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Insere o código da UORG do local do acidente.
 
     Args:
@@ -164,7 +170,7 @@ def cat_uorg_local_acidente(df_cat: pd.DataFrame):
     return df
 
 
-def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame):
+def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Insere o código da Seção da CNAE do local do acidente.
 
     Args:
@@ -184,7 +190,7 @@ def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame):
     return df
 
 
-def cat_formatar_datas(df_cat: pd.DataFrame):
+def cat_formatar_datas(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Converte as colunas de datas para string no formato 'dd/mm/yyyy'
 
     Args:
@@ -202,7 +208,31 @@ def cat_formatar_datas(df_cat: pd.DataFrame):
     return df
 
 
-def cat_identifica_recibo_raiz(df_cat: pd.DataFrame):
+def cat_formatar_identificadores(df_cat: pd.DataFrame) -> pd.DataFrame:
+    """Formata CPF, CNPJ, CAEPF, CNO', CNAE e CBO
+
+    Args:
+        df_cat: DataFrame com os dados das CATs.
+
+    Returns:
+        DataFrame com os dados CATs tratados
+    """
+    df = df_cat.copy()
+
+    for col in ['cnae_localtabgeral', 'cnae_local_acidente']:
+        df[col] = df[col].apply(lambda x: format_cnae(x) if not pd.isna(x) else np.NaN)
+
+    df['codcbo'] = df.codcbo.apply(lambda x: format_cbo(x) if not pd.isna(x) else np.NaN)
+
+    df['nrinsc'] = df.apply(format_nrinsc, axis=1)
+    df['localtabgeral_nrinsc'] = df.apply(format_localtabgeral_nrinsc, axis=1)
+    df['nrinsc_estab_local_acidente'] = df.apply(format_nrinsc_estab_local_acidente, axis=1)
+    df['cpftrab'] = df.cpftrab.apply(lambda x: format_cpf(x) if not pd.isna(x) else np.NaN)
+
+    return df
+
+
+def cat_identifica_recibo_raiz(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Em caso de uma ou mais reabertura(s) ou de comunicação de óbito, identifica o número do recibo da primeira CAT
     transmitida pelo empregador para o acidente/doença.
 
@@ -229,7 +259,7 @@ def cat_identifica_recibo_raiz(df_cat: pd.DataFrame):
     return df
 
 
-def cat_mantem_recibo_ultima_reabertura(df_cat: pd.DataFrame):
+def cat_mantem_recibo_ultima_reabertura(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Em caso de uma ou mais reabertura(s) ou de comunicação de óbito, mantém na DataFrame somente a última CAT
     transmitida pelo empregador.
 
@@ -250,7 +280,7 @@ def cat_mantem_recibo_ultima_reabertura(df_cat: pd.DataFrame):
     return df
 
 
-def cat_atribui_fatores_risco(df_cat: pd.DataFrame, fatores_params_reshaped: dict):
+def cat_atribui_fatores_risco(df_cat: pd.DataFrame, fatores_params_reshaped: dict) -> pd.DataFrame:
     """Insere cinco colunas contendo códigos de fatores de risco relacionados ao acidente, baseados, respectivamente,
     nos valores das colunas 'codsitgeradora', 'codagntcausador', 'dsclesao', 'codcid' e 'codcidCategoria'
 
@@ -287,7 +317,7 @@ def cat_atribui_fatores_risco(df_cat: pd.DataFrame, fatores_params_reshaped: dic
     return df
 
 
-def cat_compila_fatores_risco(df_cat: pd.DataFrame):
+def cat_compila_fatores_risco(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Compila as colunas contendo os códigos dos fatores de risco relacionados ao acidente em uma coluna única,
     contendo uma lista.
 
@@ -310,7 +340,7 @@ def cat_compila_fatores_risco(df_cat: pd.DataFrame):
     return df
 
 
-def cat_atribui_consequencia(df_cat: pd.DataFrame):
+def cat_atribui_consequencia(df_cat: pd.DataFrame) -> pd.DataFrame:
     """ Cria uma coluna contendo a lista de consequências do acidente, conforme categorias pré-definidas.
 
     Args:
@@ -332,7 +362,7 @@ def cat_atribui_consequencia(df_cat: pd.DataFrame):
     return df
 
 
-def cat_inserir_descricoes(df_cat: pd.DataFrame):
+def cat_inserir_descricoes(df_cat: pd.DataFrame) -> pd.DataFrame:
     """ Insere colunas com as descrições dos códigos numéricos presentes em diversas colunas.
 
     Args:
@@ -391,6 +421,15 @@ def cat_to_pdf(series: pd.Series,
                html_template: Path,
                logo: Path,
                output_dir: Path | None = None):
+    """ Gera um PDF para a CAT.
+
+    Args:
+        series: Series com os dados da CAT
+        html_template: Local do template HTML.
+        logo:  Local do logo para ser inserido no template
+        output_dir: Diretório de destino do arquivo PDF
+
+    """
     nr_recibo = series.meta_nr_recibo
 
     html_path = output_dir / f'{nr_recibo}.html' if output_dir else f'{nr_recibo}.html'
@@ -412,3 +451,39 @@ def cat_to_pdf(series: pd.Series,
         weasyprint.HTML(html_path, encoding="utf-8").write_pdf(pdf_path)
 
         os.remove(html_path)
+
+
+def cat_tabela_resumo(df_cat: pd.DataFrame) -> pd.DataFrame:
+    """Gera tabela com os principais campos da CAT, para ser anexada no corpo do email do alerta.
+
+    Args:
+        df_cat: DataFrame com os dados das CATs.
+
+    Returns:
+        DataFrame com os dados CATs tratados
+    """
+    alerta_cols = ['meta_nr_recibo', 'ds_tpacid', 'Consequencia', 'CDFatorAmbiental',
+                   'ds_municipio_local_acidente', 'sguf_local_acidente', ]
+    df = df_cat[alerta_cols].copy()
+
+    df.Consequencia = df.Consequencia.apply(lambda x: '<br>'.join(x))
+
+    def map_fr(lista):
+        map_dict = (pd.read_csv(f'../data/input/aux_tables/fator_risco.csv', dtype='object')
+                    .set_index('CDFatorAmbiental')['DSFatorAmbiental']
+                    .to_dict())
+        lista_mapped = [f'{elemento} - {map_dict[elemento]}' for elemento in lista]
+        return '<br>'.join(lista_mapped)
+
+    df['CDFatorAmbiental'] = df['CDFatorAmbiental'].apply(map_fr)
+
+    df["Local do Acidente"] = df["ds_municipio_local_acidente"] + '/' + df["sguf_local_acidente"]
+
+    df = (df
+          .drop(columns=['ds_municipio_local_acidente', 'sguf_local_acidente'])
+          .rename(columns={'meta_nr_recibo': 'Número da CAT',
+                           'ds_tpacid': 'Tipo',
+                           'Consequencia': 'Consequências',
+                           'CDFatorAmbiental': 'Fatores de risco'}))
+
+    return df

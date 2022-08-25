@@ -1,5 +1,9 @@
 ---
-# Diretório raiz do projeto
+# Responsáveis
+#admin: ['joao.reis@economia.gov.br', 'jeferson.seidler@economia.gov.br']
+#coordenador: ['marcelo.simeao@economia.gov.br']
+admin: ['joao.reis@economia.gov.br']
+coordenador: []
 
 # Formulário de inscrição
 FORM_INSC: {ID_GSHEET: '1BGNomIEkIgiPaPbMpeCArVCpERKK9TGHYFyT4Mt9grk',
