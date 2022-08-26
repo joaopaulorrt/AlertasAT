@@ -239,61 +239,61 @@ try:
 
         cats_resumo_html = acidentes.cat_tabela_resumo(cats_filtradas_adm).to_html(index=False, escape=False)
 
-        resumo_inscricoes = (inscricoes_compilado_novos_codigos[['UF', 'E-mail', 'UORG']]
-                             .fillna('Todas')
-                             .sort_values(['UF', 'UORG', 'E-mail', ]))
+    resumo_inscricoes = (inscricoes_compilado_novos_codigos[['UF', 'E-mail', 'UORG']]
+                         .fillna('Todas')
+                         .sort_values(['UF', 'UORG', 'E-mail', ]))
 
-        envios = pd.read_csv(log_alertas_usuario)
-        envios.timestamp = pd.to_datetime(envios.timestamp)
-        envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
-        envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
+    envios = pd.read_csv(log_alertas_usuario)
+    envios.timestamp = pd.to_datetime(envios.timestamp)
+    envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
+    envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
 
-        resumo_alertas_hj =(resumo_inscricoes
-                            .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
-                            .fillna(0))
-        resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
+    resumo_alertas_hj =(resumo_inscricoes
+                        .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
+                        .fillna(0))
+    resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
 
-        alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
-        campos_email_adm = {'cats': cats_resumo_html,
-                            'resumo_notificacoes': resumo_alertas_hj_html}
+    alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
+    campos_email_adm = {'cats': cats_resumo_html if not cats_filtradas_adm.empty else f'Sem novos registros em {dt_hoje_str}',
+                        'resumo_notificacoes': resumo_alertas_hj_html}
 
-        for adm_email in admins_coord:
-            msg_adm = email_sender.EmailMessageHTML(destinatario=adm_email,
-                                                    sender_email=cfg['SENDER_EMAIL'],
-                                                    assunto=f'Alerta de acidente do trabalho ({dt_hoje_str}) - Coordenador',
-                                                    template_html=alerta_adm_html_template,
-                                                    template_campos=campos_email_adm,
-                                                    anexos=anexos,
-                                                    imagens=logo_saat)
+    for adm_email in admins_coord:
+        msg_adm = email_sender.EmailMessageHTML(destinatario=adm_email,
+                                                sender_email=cfg['SENDER_EMAIL'],
+                                                assunto=f'Alerta de acidente do trabalho ({dt_hoje_str}) - Coordenador',
+                                                template_html=alerta_adm_html_template,
+                                                template_campos=campos_email_adm,
+                                                anexos=anexos if not cats_filtradas_adm.empty else None,
+                                                imagens=logo_saat)
 
-            try:
-                msg_adm.send(auth_user=secrets['EMAIL'],
-                             password=secrets['PASSWORD'],
-                             smtp_server=cfg['SMPT_SERVER'],
-                             port=cfg['PORT'])
+        try:
+            msg_adm.send(auth_user=secrets['EMAIL'],
+                         password=secrets['PASSWORD'],
+                         smtp_server=cfg['SMPT_SERVER'],
+                         port=cfg['PORT'])
 
-                # Registra no log o sucesso
-                for index_cat, cat in cats_filtradas_adm.iterrows():
-                    log_dict = {'timestamp': datetime_str,
-                                'email': adm_email,
-                                'meta_nr_recibo': cat['meta_nr_recibo'],
-                                'dtacid': cat['dtacid'],
-                                'DTEmissaoCAT': cat['DTEmissaoCAT'],
-                                'status': 'Sucesso'}
+            # Registra no log o sucesso
+            for index_cat, cat in cats_filtradas_adm.iterrows():
+                log_dict = {'timestamp': datetime_str,
+                            'email': adm_email,
+                            'meta_nr_recibo': cat['meta_nr_recibo'],
+                            'dtacid': cat['dtacid'],
+                            'DTEmissaoCAT': cat['DTEmissaoCAT'],
+                            'status': 'Sucesso'}
 
-                    backup.backup_csv_append(log_alertas_adm, log_dict)
+                backup.backup_csv_append(log_alertas_adm, log_dict)
 
-            except:
-                # Registra no log a falha
-                for index_cat, cat in cats_filtradas_adm.iterrows():
-                    log_dict = {'timestamp': datetime_str,
-                                'email': adm_email,
-                                'meta_nr_recibo': cat['meta_nr_recibo'],
-                                'dtacid': cat['dtacid'],
-                                'DTEmissaoCAT': cat['DTEmissaoCAT'],
-                                'status': 'Falhou'}
+        except:
+            # Registra no log a falha
+            for index_cat, cat in cats_filtradas_adm.iterrows():
+                log_dict = {'timestamp': datetime_str,
+                            'email': adm_email,
+                            'meta_nr_recibo': cat['meta_nr_recibo'],
+                            'dtacid': cat['dtacid'],
+                            'DTEmissaoCAT': cat['DTEmissaoCAT'],
+                            'status': 'Falhou'}
 
-                    backup.backup_csv_append(log_alertas_adm, log_dict)
+                backup.backup_csv_append(log_alertas_adm, log_dict)
 
     # # # # # # # # # # # # # # # # # # # # # # # # #
     # Registra no log o resultado da execução
