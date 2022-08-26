@@ -52,8 +52,8 @@ log_execucoes = log_dir / 'log_execucoes.csv'
 # Backup
 backup_dir = str(root_dir / 'data/backup')
 
-# Variáveis globais
-admins_coord = list(set(cfg['admin'] + cfg['coordenador']))
+# Variáveis
+admins_coord = list(set(cfg['ADMIN'] + cfg['COORDENADOR']))
 dt_hoje_str = str(datetime.now().strftime("%d/%m/%Y"))
 datetime_str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -152,6 +152,13 @@ try:
 
         cats_filtradas = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial, cats_tratadas)
 
+        if os.path.exists(log_alertas_usuario):
+            ja_notificadas = pd.read_csv(log_alertas_usuario)  # TODO
+            ja_notificadas_recibo = (ja_notificadas[ja_notificadas.email == destinatario['E-mail']]
+                                     .meta_nr_recibo
+                                     .to_list())
+            cats_filtradas = cats_filtradas[~cats_filtradas.meta_nr_recibo.isin(ja_notificadas_recibo)]
+
         if not cats_filtradas.empty:
             # Gera PDF das CAT
             for index_cat, cat in cats_filtradas.iterrows():
@@ -210,8 +217,7 @@ try:
     # # # # # # # # # # # # # # # # # # # # # # # # #
 
     # Filtra CATs para os administradores / coordenadores
-    perfil_admin = pd.Series({'Consequência do acidente': 'Óbito',
-                              'Tipo de acidente': 'Acidentes típicos, Doenças do Trabalho'})
+    perfil_admin = pd.Series(cfg['PERFIL_COORD'])
 
     funcoes_filtra_cats_adm = [acidentes_filtrar.tpacid,
                                acidentes_filtrar.consequencias]
@@ -220,7 +226,7 @@ try:
 
     cats_filtradas_adm = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial_adm, cats_tratadas)
 
-    if not cats_filtradas_adm.empty:
+    if not cats_filtradas_adm.empty: # TODO - manda resumo se não tiver fatal
         # Gera PDF das CAT
         for index_cat, cat in cats_filtradas_adm.iterrows():
             acidentes.cat_to_pdf(cat,
@@ -242,7 +248,9 @@ try:
         envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
         envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
 
-        resumo_alertas_hj = resumo_inscricoes.merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
+        resumo_alertas_hj =(resumo_inscricoes
+                            .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
+                            .fillna(0))
         resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
 
         alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
@@ -320,7 +328,7 @@ except Exception as error:
 
     backup.backup_csv_append(log_execucoes, log_dict)
 
-    for adm_email in cfg['admin']:
+    for adm_email in cfg['ADMIN']:
         msg_txt = email_sender.EmailMessagText(destinatario=adm_email,
                                                sender_email=cfg['SENDER_EMAIL'],
                                                assunto='SAAT - Erro na execução do script',
@@ -330,3 +338,5 @@ except Exception as error:
                      password=secrets['PASSWORD'],
                      smtp_server=cfg['SMPT_SERVER'],
                      port=cfg['PORT'])
+
+    raise Exception('error')

@@ -1,9 +1,11 @@
 ---
 # Responsáveis
-#admin: ['joao.reis@economia.gov.br', 'jeferson.seidler@economia.gov.br']
-#coordenador: ['marcelo.simeao@economia.gov.br']
-admin: ['joao.reis@economia.gov.br']
-coordenador: []
+#ADMIN: ['joao.reis@economia.gov.br', 'jeferson.seidler@economia.gov.br']
+#COORDENADOR: ['marcelo.simeao@economia.gov.br']
+ADMIN: ['joao.reis@economia.gov.br']
+COORDENADOR: []
+PERFIL_COORD: {'Consequência do acidente': 'Óbito',
+               'Tipo de acidente': 'Acidentes típicos, Doenças do Trabalho'}
 
 # Formulário de inscrição
 FORM_INSC: {ID_GSHEET: '1BGNomIEkIgiPaPbMpeCArVCpERKK9TGHYFyT4Mt9grk',

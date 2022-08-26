@@ -353,7 +353,15 @@ def cat_atribui_consequencia(df_cat: pd.DataFrame) -> pd.DataFrame:
 
     def consequencia(s: pd.Series):
         function_list = [helpers_consequencia.obito,
-                         helpers_consequencia.internacao]
+                         helpers_consequencia.internacao,
+                         helpers_consequencia.amputacao_dedo,
+                         helpers_consequencia.amputacao_exceto_dedo,
+                         helpers_consequencia.fratura_dedo,
+                         helpers_consequencia.fratura_exceto_dedo,
+                         helpers_consequencia.perda_visao,
+                         helpers_consequencia.perda_audicao,
+                         helpers_consequencia.tratamento_15,
+                         helpers_consequencia.tratamento_30]
 
         return [fun(s) for fun in function_list if fun(s) is not None]
 

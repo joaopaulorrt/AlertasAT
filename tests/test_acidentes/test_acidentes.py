@@ -153,19 +153,44 @@ class TestReciboRaiz:
 
 
 def test_atribui_consequencia():
-    cats = pd.DataFrame([{'indcatobito': 'S', 'indinternacao': 'N'},
-                         {'indcatobito': 'N', 'indinternacao': 'S'},
-                         {'indcatobito': 'S', 'indinternacao': 'S'},
-                         {'indcatobito': 'N', 'indinternacao': 'N'},
+    cats = pd.DataFrame([{'indcatobito': 'S',
+                          'indinternacao': 'N',
+                          'dsclesao': '702035000',
+                          'codparteating': '755070000',
+                          'codcidCategoria': 'A00',
+                          'codcid': 'A000',
+                          'durtrat': 40},
+
+                         {'indcatobito': 'N',
+                          'indinternacao': 'S',
+                          'dsclesao': '000000000',
+                          'codparteating': '000000000',
+                          'codcidCategoria': 'S68',
+                          'codcid': 'S681',
+                          'durtrat': 5},
                          ]
                         )
 
-    esperado = pd.DataFrame(
-        [{'indcatobito': 'S', 'indinternacao': 'N', 'Consequencia': ['Óbito']},
-         {'indcatobito': 'N', 'indinternacao': 'S', 'Consequencia': ['Internação do trabalhador']},
-         {'indcatobito': 'S', 'indinternacao': 'S', 'Consequencia': ['Óbito', 'Internação do trabalhador']},
-         {'indcatobito': 'N', 'indinternacao': 'N', 'Consequencia': []},
-         ])
+    esperado = pd.DataFrame([{'indcatobito': 'S',
+                              'indinternacao': 'N',
+                              'dsclesao': '702035000',
+                              'codparteating': '755070000',
+                              'codcidCategoria': 'A00',
+                              'codcid': 'A000',
+                              'durtrat': 40,
+                              'Consequencia': ['Óbito', 'Fratura (dedo)',
+                                               'Duração estimada do tratamento superior a 30 dias']},
+
+                             {'indcatobito': 'N',
+                              'indinternacao': 'S',
+                              'dsclesao': '000000000',
+                              'codparteating': '000000000',
+                              'codcidCategoria': 'S68',
+                              'codcid': 'S681',
+                              'durtrat': 5,
+                              'Consequencia': ['Internação do trabalhador', 'Amputação (dedo)']},
+                             ]
+                            )
 
     resultado = acidentes.cat_atribui_consequencia(cats)
     assert_frame_equal(esperado, resultado)

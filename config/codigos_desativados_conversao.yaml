@@ -1,7 +1,9 @@
 ---
 # Conversões (de -> para) de parâmetros descontinuados
 CONSEQUENCIA: {'Amputação de membro (exceto dedo)': 'Amputação (exceto dedo)',
-               'Amputação de membro (inclusive dedo)': 'Amputação (inclusive dedo)',}
+               'Amputação de membro (inclusive dedo)': 'Amputação (inclusive dedo)',
+               'Fratura (exceto dedo)': 'Fraturas e traumatismos não superficiais (exceto dedo)',
+               'Fratura (dedo)': 'Fraturas e traumatismos não superficiais (dedo)', }
 
 FATOR_RISCO: {}
 
