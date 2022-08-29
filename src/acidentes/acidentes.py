@@ -32,7 +32,7 @@ def cat_extrair() -> pd.DataFrame:
             """
 
     else:
-        sete_dias_atras = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
+        sete_dias_atras = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')
         query = f"""
     
             SELECT *

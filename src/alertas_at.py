@@ -98,13 +98,14 @@ try:
     # Erro por ausência de carga de novas CATs
     # # # # # # # # # # # # # # # # # # # # # #
     if cats.empty:
-
-        df_log_execucoes = pd.read_csv(log_execucoes, dtype='object').fillna('')
-        ultima_cat = df_log_execucoes[df_log_execucoes.ultima_cat_baixada == df_log_execucoes.ultima_cat_baixada.max()].squeeze()
-
-        sem_cat_msg = (
-            'Não há novos registros no banco de dados das CATs.'
-            f' A CAT {ultima_cat.ultima_cat_baixada}, de {ultima_cat.dt_ultima_cat_baixada}, é a mais recente no banco.')
+        if os.path.exists(log_execucoes):
+            df_log_execucoes = pd.read_csv(log_execucoes, dtype='object').fillna('')
+            ultima_cat = df_log_execucoes[df_log_execucoes.ultima_cat_baixada == df_log_execucoes.ultima_cat_baixada.max()].squeeze()
+            sem_cat_msg = (
+                'Não há novos registros no banco de dados das CATs.'
+                f' A CAT {ultima_cat.ultima_cat_baixada}, de {ultima_cat.dt_ultima_cat_baixada}, é a mais recente no banco.')
+        else:
+            sem_cat_msg = 'Não há novos registros no banco de dados das CATs referentes aos últimos 7 dias.'
 
         raise Exception(sem_cat_msg)
 
@@ -235,9 +236,12 @@ try:
                                  output_dir=output_dir_cat_pdf)
 
         # Envia alerta por email
-        anexos = [output_dir_cat_pdf / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas_adm.itertuples()]
+        anexos_adm = [output_dir_cat_pdf / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas_adm.itertuples()]
 
-        cats_resumo_html = acidentes.cat_tabela_resumo(cats_filtradas_adm).to_html(index=False, escape=False)
+        cats_resumo_html_adm = acidentes.cat_tabela_resumo(cats_filtradas_adm).to_html(index=False, escape=False)
+    else:
+        anexos_adm = None
+        cats_resumo_html_adm = None
 
     resumo_inscricoes = (inscricoes_compilado_novos_codigos[['UF', 'E-mail', 'UORG']]
                          .fillna('Todas')
@@ -248,13 +252,15 @@ try:
     envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
     envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
 
-    resumo_alertas_hj =(resumo_inscricoes
-                        .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
-                        .fillna(0))
+    resumo_alertas_hj = (resumo_inscricoes
+                         .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
+                         .fillna(0)
+                         .convert_dtypes())
+
     resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
 
     alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
-    campos_email_adm = {'cats': cats_resumo_html if not cats_filtradas_adm.empty else f'Sem novos registros em {dt_hoje_str}',
+    campos_email_adm = {'cats': cats_resumo_html_adm if cats_resumo_html_adm else f'Sem novos registros',
                         'resumo_notificacoes': resumo_alertas_hj_html}
 
     for adm_email in admins_coord:
@@ -263,7 +269,7 @@ try:
                                                 assunto=f'Alerta de acidente do trabalho ({dt_hoje_str}) - Coordenador',
                                                 template_html=alerta_adm_html_template,
                                                 template_campos=campos_email_adm,
-                                                anexos=anexos if not cats_filtradas_adm.empty else None,
+                                                anexos=anexos_adm if anexos_adm else None,
                                                 imagens=logo_saat)
 
         try:
