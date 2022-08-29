@@ -13,16 +13,18 @@ from . import helpers_consequencia
 from .helpers_format_identificadores import format_cnae, format_cbo, format_nrinsc, format_cpf
 
 
-def cat_extrair() -> pd.DataFrame:
+def cat_extrair(log_execucoes: Path) -> pd.DataFrame:
     """Importa os dados das novas CATs recebidas ou, em caso de ausência de informação, dos últimos 7 dias.
+
+    Args:
+        log_execucoes: Path do arquivo .csv contendo o log de execuções do script.
 
     Returns:
         DataFrame com os dados das novas CATs
     """
-    log_execucoes_path = Path('../data/log/log_execucoes.csv') # Todo
-    if os.path.exists(log_execucoes_path):
-        log_execucoes = pd.read_csv(log_execucoes_path)
-        ultima_cat = log_execucoes.ultima_cat_baixada.fillna('').max()
+    if os.path.exists(log_execucoes):
+        df_log_execucoes = pd.read_csv(log_execucoes)
+        ultima_cat = df_log_execucoes.ultima_cat_baixada.fillna('').max()
         query = f"""
 
             SELECT *
@@ -149,38 +151,41 @@ def cat_novas_colunas(df_cat: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def cat_uorg_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
+def cat_uorg_local_acidente(df_cat: pd.DataFrame, uorgs: Path, uf_uorgs: Path) -> pd.DataFrame:
     """Insere o código da UORG do local do acidente.
 
     Args:
         df_cat: DataFrame com os dados das CATs.
+        uorgs: Path do arquivo .csv contendo os códigos de UORG por município.
+        uf_uorgs: Path do arquivo .csv contendo as siglas de UF por UORG.
 
     Returns:
         DataFrame com os dados CATs tratados
     """
     df = df_cat.copy()
 
-    uorgs = pd.read_csv(f'../data/input/aux_tables/uorg.csv', dtype='object').set_index('CDMunicipio').to_dict()['NRUORG']  # TODO
-    uf_uorgs = pd.read_csv(f'../data/input/aux_tables/uf_uorg.csv', dtype='object').set_index('CDUORG').to_dict()['SGUF']  # TODO
+    df_uorgs = pd.read_csv(uorgs, dtype='object').set_index('CDMunicipio').to_dict()['NRUORG']
+    df_uf_uorgs = pd.read_csv(uf_uorgs, dtype='object').set_index('CDUORG').to_dict()['SGUF']
 
-    df['uorg_local_acidente'] = df['municipio_local_acidente'].map(uorgs)
-    df['uf_uorg_local_acidente'] = df['uorg_local_acidente'].map(uf_uorgs)
+    df['uorg_local_acidente'] = df['municipio_local_acidente'].map(df_uorgs)
+    df['uf_uorg_local_acidente'] = df['uorg_local_acidente'].map(df_uf_uorgs)
 
     return df
 
 
-def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
+def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame, secoes_cnae: Path) -> pd.DataFrame:
     """Insere o código da Seção da CNAE do local do acidente.
 
     Args:
         df_cat: DataFrame com os dados das CATs.
+        secoes_cnae: Path do arquivo .csv contendo a Seção da CNAE por subclasse.
 
     Returns:
         DataFrame com os dados CATs tratados
     """
     df = df_cat.copy()
 
-    secao_cnae = (pd.read_csv(f'../data/input/aux_tables/cnae_secao.csv', dtype='object')   # TODO
+    secao_cnae = (pd.read_csv(secoes_cnae, dtype='object')
                   .set_index('CDSubclasse')
                   .to_dict()['CDSecao'])
 
@@ -370,11 +375,12 @@ def cat_atribui_consequencia(df_cat: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def cat_inserir_descricoes(df_cat: pd.DataFrame) -> pd.DataFrame:
+def cat_inserir_descricoes(df_cat: pd.DataFrame, aux_tables_dir: Path) -> pd.DataFrame:
     """ Insere colunas com as descrições dos códigos numéricos presentes em diversas colunas.
 
     Args:
         df_cat: DataFrame com os dados das CATs.
+        aux_tables_dir: Path do diretório contendo os arquivos .csv das tabelas auxiliares.
 
     Returns:
         DataFrame com os dados CATs tratados
@@ -416,9 +422,9 @@ def cat_inserir_descricoes(df_cat: pd.DataFrame) -> pd.DataFrame:
 
     for col, csv in cols_to_map.items():
         if col in cols_integer_as_index:
-            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}')   # TODO
+            df_map = pd.read_csv(aux_tables_dir / csv)
         else:
-            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}', dtype='object')   # TODO
+            df_map = pd.read_csv(aux_tables_dir / csv, dtype='object')
         dict_map = dict(zip(df_map.iloc[:, 0], df_map.iloc[:, 1]))
         df[f'ds_{col}'] = df[col].map(dict_map)
 
@@ -461,11 +467,12 @@ def cat_to_pdf(series: pd.Series,
         os.remove(html_path)
 
 
-def cat_tabela_resumo(df_cat: pd.DataFrame) -> pd.DataFrame:
+def cat_tabela_resumo(df_cat: pd.DataFrame, fatores_risco: Path) -> pd.DataFrame:
     """Gera tabela com os principais campos da CAT, para ser anexada no corpo do email do alerta.
 
     Args:
         df_cat: DataFrame com os dados das CATs.
+        fatores_risco: Path do arquivo .csv contendo as descrições dos fatores de risco.
 
     Returns:
         DataFrame com os dados CATs tratados
@@ -477,7 +484,7 @@ def cat_tabela_resumo(df_cat: pd.DataFrame) -> pd.DataFrame:
     df.Consequencia = df.Consequencia.apply(lambda x: '<br>'.join(x))
 
     def map_fr(lista):
-        map_dict = (pd.read_csv(f'../data/input/aux_tables/fator_risco.csv', dtype='object')   # TODO
+        map_dict = (pd.read_csv(fatores_risco, dtype='object')
                     .set_index('CDFatorAmbiental')['DSFatorAmbiental']
                     .to_dict())
         lista_mapped = [f'{elemento} - {map_dict[elemento]}' for elemento in lista]

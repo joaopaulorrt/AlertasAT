@@ -31,17 +31,24 @@ codigos_desativados = read_yaml(root_dir / 'config/codigos_desativados_conversao
 fatores_params = read_yaml(root_dir / 'config/fatores_risco_classificacao.yaml')
 fatores_params_reshaped = acidentes.reshape_fatores_params(fatores_params)
 
-# Indica diretórios e arquivos a serem utilizados
+# HTML Templates
 cat_html_template = Path('../data/input/html_templates/cat.html')
 alerta_user_html_template = Path('../data/input/html_templates/alerta_usuario.html')
 alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
+
+# Tabelas auxiliares
+aux_tables_dir = Path('../data/input/aux_tables')
+fatores_risco_csv = Path('../data/input/aux_tables/fator_risco.csv')
+uorgs_csv = Path('../data/input/aux_tables/uorg.csv')
+uf_uorgs_csv = Path('../data/input/aux_tables/uf_uorg.csv')
+secoes_cnae_csv = Path('../data/input/aux_tables/cnae_secao.csv.csv')
 
 # Imagens
 logo_sit = Path('../data/input/images/logoSIT.png')
 logo_saat = Path('../data/input/images/logoSAAT_email.png')
 
 # Cats em PDF
-output_dir_cat_pdf = Path('../data/output/cat_pdf')
+cat_pdf_dir = Path('../data/output/cat_pdf')
 
 # LOGs
 log_dir = Path('../data/log')
@@ -51,6 +58,9 @@ log_execucoes = log_dir / 'log_execucoes.csv'
 
 # Backup
 backup_dir = root_dir / 'data/backup'
+backup_opcoes_form = backup_dir / 'opcoes_form_insc.csv'
+backup_inscricoes = backup_dir / 'inscricoes.csv'
+backup_cancelamentos = backup_dir / 'cancelamentos.csv'
 
 # Variáveis
 admins_coord = list(set(cfg['ADMIN'] + cfg['COORDENADOR']))
@@ -68,7 +78,7 @@ try:
 
     # Importa dados que populam as opções do formulário de inscrição
     opcoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
-    backup.backup_csv_new_file(opcoes, backup_path=backup_dir / 'opcoes_form_insc.csv')
+    backup.backup_csv_new_file(opcoes, backup_path=backup_opcoes_form)
 
     # Importa listas de inscrições e cancelamentos e compila lista de usuários ativos
     inscricoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC']['ID_GSHEET'])
@@ -77,9 +87,8 @@ try:
     inscricoes_compilado_novos_codigos = usuarios.update_codigos_desativados(inscricoes_compilado, codigos_desativados)
 
     # Realiza backup dos dados provenientes dos formulários de inscrição e cancelamento
-    backup.backup_csv(inscricoes, backup_path=backup_dir / 'inscricoes.csv')
-    backup.backup_csv(cancelamentos, backup_path=backup_dir / 'cancelamentos.csv')
-    backup.backup_csv(inscricoes_compilado_novos_codigos, backup_path=backup_dir / 'inscricoes_compilado.csv')
+    backup.backup_csv(inscricoes, backup_path=backup_inscricoes)
+    backup.backup_csv(cancelamentos, backup_path=backup_cancelamentos)
 
     # # # # # # # # # # #
     # Importa as CATs
@@ -92,7 +101,7 @@ try:
                                        url_test_connection=cfg['VPN_URL_TEST_CONNECTION'])
 
     # Importa novas CATs
-    cats = acidentes.cat_extrair()
+    cats = acidentes.cat_extrair(log_execucoes=log_execucoes)
 
     # # # # # # # # # # # # # # # # # # # # # #
     # Erro por ausência de carga de novas CATs
@@ -115,21 +124,31 @@ try:
     cat_atribui_fatores_risco_partial = partial(acidentes.cat_atribui_fatores_risco,
                                                 fatores_params_reshaped=fatores_params_reshaped)
 
+    cat_uorg_local_acidente_partial = partial(acidentes.cat_uorg_local_acidente,
+                                              uorgs=uorgs_csv,
+                                              uf_uorgs=uf_uorgs_csv)
+
+    cat_secao_cnae_local_acidente_partial = partial(acidentes.cat_secao_cnae_local_acidente,
+                                                    secoes_cnae=secoes_cnae_csv)
+
+    cat_inserir_descricoes_partial = partial(acidentes.cat_inserir_descricoes,
+                                             aux_tables_dir=aux_tables_dir)
+
     functions_list = [acidentes.cat_converter_inteiros,
                       acidentes.cat_converter_datas,
                       acidentes.cat_formatar_horas,
                       acidentes.cat_formatar_strings,
                       acidentes.cat_cid_uppercase,
                       acidentes.cat_novas_colunas,
-                      acidentes.cat_uorg_local_acidente,
-                      acidentes.cat_secao_cnae_local_acidente,
+                      cat_uorg_local_acidente_partial,
+                      cat_secao_cnae_local_acidente_partial,
                       acidentes.cat_formatar_datas,
                       acidentes.cat_identifica_recibo_raiz,
                       acidentes.cat_mantem_recibo_ultima_reabertura,
                       cat_atribui_fatores_risco_partial,
                       acidentes.cat_compila_fatores_risco,
                       acidentes.cat_atribui_consequencia,
-                      acidentes.cat_inserir_descricoes,
+                      cat_inserir_descricoes_partial,
                       acidentes.cat_formatar_identificadores,
                       ]
 
@@ -166,11 +185,12 @@ try:
                 acidentes.cat_to_pdf(cat,
                                      html_template=cat_html_template,
                                      logo=logo_sit,
-                                     output_dir=output_dir_cat_pdf)
+                                     output_dir=cat_pdf_dir)
 
             # Envia alerta por email
-            anexos = [output_dir_cat_pdf / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas.itertuples()]
-            cats_resumo_html = acidentes.cat_tabela_resumo(cats_filtradas).to_html(index=False, escape=False)
+            anexos = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas.itertuples()]
+            cats_resumo_html = (acidentes.cat_tabela_resumo(cats_filtradas, fatores_risco=fatores_risco_csv)
+                                .to_html(index=False, escape=False))
             campos_email = {'cats': cats_resumo_html,
                             'uf': destinatario.fillna('-')['UF'],
                             'uorg': destinatario.fillna('-')['UORG'],
@@ -233,12 +253,13 @@ try:
             acidentes.cat_to_pdf(cat,
                                  html_template=cat_html_template,
                                  logo=logo_sit,
-                                 output_dir=output_dir_cat_pdf)
+                                 output_dir=cat_pdf_dir)
 
         # Envia alerta por email
-        anexos_adm = [output_dir_cat_pdf / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas_adm.itertuples()]
+        anexos_adm = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats_filtradas_adm.itertuples()]
 
-        cats_resumo_html_adm = acidentes.cat_tabela_resumo(cats_filtradas_adm).to_html(index=False, escape=False)
+        cats_resumo_html_adm = (acidentes.cat_tabela_resumo(cats_filtradas_adm, fatores_risco=fatores_risco_csv)
+                                .to_html(index=False, escape=False))
     else:
         anexos_adm = None
         cats_resumo_html_adm = None
@@ -259,7 +280,6 @@ try:
 
     resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
 
-    alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
     campos_email_adm = {'qtd_cats': cats_tratadas.shape[0],
                         'cats': cats_resumo_html_adm if cats_resumo_html_adm else f'Sem novos registros',
                         'resumo_notificacoes': resumo_alertas_hj_html}
