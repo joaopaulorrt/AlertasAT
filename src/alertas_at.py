@@ -227,7 +227,7 @@ try:
 
     cats_filtradas_adm = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial_adm, cats_tratadas)
 
-    if not cats_filtradas_adm.empty: # TODO - manda resumo se não tiver fatal
+    if not cats_filtradas_adm.empty:
         # Gera PDF das CAT
         for index_cat, cat in cats_filtradas_adm.iterrows():
             acidentes.cat_to_pdf(cat,
@@ -260,7 +260,8 @@ try:
     resumo_alertas_hj_html = resumo_alertas_hj.to_html(index=False, escape=False)
 
     alerta_adm_html_template = Path('../data/input/html_templates/alerta_adm.html')
-    campos_email_adm = {'cats': cats_resumo_html_adm if cats_resumo_html_adm else f'Sem novos registros',
+    campos_email_adm = {'qtd_cats': cats_tratadas.shape[0],
+                        'cats': cats_resumo_html_adm if cats_resumo_html_adm else f'Sem novos registros',
                         'resumo_notificacoes': resumo_alertas_hj_html}
 
     for adm_email in admins_coord:
@@ -312,6 +313,7 @@ try:
     ultima_cat = cats_tratadas[cats_tratadas.meta_nr_recibo == cats_tratadas.meta_nr_recibo.max()]
 
     log_dict = {'timestamp': datetime_str,
+                'qtd_cat_baixada': cats_tratadas.shape[0],
                 'ultima_cat_baixada': ultima_cat.squeeze().meta_nr_recibo,
                 'dt_ultima_cat_baixada': ultima_cat.squeeze().DTEmissaoCAT,
                 'alertas_enviados': len(envios_hj),
@@ -326,6 +328,7 @@ try:
 
 except Exception as error:
     log_dict = {'timestamp': datetime_str,
+                'qtd_cat_baixada': '',
                 'ultima_cat_baixada': '',
                 'dt_ultima_cat_baixada': '',
                 'alertas_enviados': '',
