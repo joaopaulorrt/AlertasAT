@@ -247,8 +247,8 @@
 
         <table>
             <tr>
-                <th style="width: 4cm">Parte do corpo atingida</th>
-                <th style="width: 2.5cm">Lateralidade da(s) parte(s) atingida(s)</th>
+                <th style="width: 14cm">Parte do corpo atingida</th>
+                <th style="width: 2.5cm">Lateralidade</th>
             </tr>
             <tr>
                 <td class='dados_left'>{{ ds_codparteating }}</td>
@@ -270,7 +270,7 @@
                 <th style="width: 2.5cm">Descrição complementar da lesão</th>
             </tr>
             <tr>
-                <td class='dados_left'>{{ dsccomplesao }}</td>
+                <td class='dados_wrap'><div style="max-height:0.8cm; overflow:hidden;">{{ dsccomplesao }}</div></td>
             </tr>
         </table>
 
@@ -307,8 +307,8 @@
         
         <table>
             <tr>
-                <th style="width: 4cm">Tipo de local</th>
-                <th style="width: 13cm">Especificação do local</th>
+                <th style="width: 3cm">Tipo de local</th>
+                <th style="width: 12cm">Especificação do local</th>
             </tr>
             <tr>
                 <td class='dados_left'>{{ ds_tplocal_acidente }}</td>
@@ -318,9 +318,9 @@
 
         <table>
             <tr>
-                <th style="width: 2.5cm">Tipo logradouro</th>
+                <th style="width: 3cm">Tipo logradouro</th>
                 <th style="width: 10.5cm">Logradouro</th>
-                <th style="width: 2cm">Número</th>
+                <th style="width: 1.5cm">Número</th>
             </tr>
             <tr>
                 <td class='dados_left'>{{ ds_tplograd_local_acidente }}</td>

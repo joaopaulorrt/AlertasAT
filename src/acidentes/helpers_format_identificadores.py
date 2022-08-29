@@ -1,5 +1,4 @@
 """"Funções auxiliares para formatação de documentos"""
-import pandas as pd
 
 
 def format_cpf(cpf: str) -> str:
@@ -89,37 +88,16 @@ def format_cno(cno: str) -> str:
     return cno_formatado
 
 
-def format_nrinsc(cat: pd.Series):
-    match cat.tpinsc:
+def format_nrinsc(tpinsc: str, nrinsc: str):
+    match tpinsc:
         case 1:
-            return format_cnpj_raiz(cat.nrinsc)
+            if len(nrinsc) == 8:
+                return format_cnpj_raiz(nrinsc)
+            else:
+                return format_cnpj(nrinsc)
         case 2:
-            return format_cpf(cat.nrinsc)
+            return format_cpf(nrinsc)
         case 3:
-            return format_caepf(cat.nrinsc)
+            return format_caepf(nrinsc)
         case 4:
-            return format_cno(cat.nrinsc)
-
-
-def format_localtabgeral_nrinsc(cat: pd.Series):
-    match cat.localtabgeral_tpinsc:
-        case 1:
-            return format_cnpj(cat.localtabgeral_nrinsc)
-        case 2:
-            return format_cpf(cat.localtabgeral_nrinsc)
-        case 3:
-            return format_caepf(cat.localtabgeral_nrinsc)
-        case 4:
-            return format_cno(cat.localtabgeral_nrinsc)
-
-
-def format_nrinsc_estab_local_acidente(cat: pd.Series):
-    match cat.tpinsc_estab_local_acidente:
-        case 1:
-            return format_cnpj(cat.nrinsc_estab_local_acidente)
-        case 2:
-            return format_cpf(cat.nrinsc_estab_local_acidente)
-        case 3:
-            return format_caepf(cat.nrinsc_estab_local_acidente)
-        case 4:
-            return format_cno(cat.nrinsc_estab_local_acidente)
+            return format_cno(nrinsc)

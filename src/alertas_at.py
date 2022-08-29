@@ -50,7 +50,7 @@ log_alertas_adm = log_dir / 'log_alertas_adm.csv'
 log_execucoes = log_dir / 'log_execucoes.csv'
 
 # Backup
-backup_dir = str(root_dir / 'data/backup')
+backup_dir = root_dir / 'data/backup'
 
 # Variáveis
 admins_coord = list(set(cfg['ADMIN'] + cfg['COORDENADOR']))
@@ -68,6 +68,7 @@ try:
 
     # Importa dados que populam as opções do formulário de inscrição
     opcoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC_OPCOES']['ID_GSHEET'])
+    backup.backup_csv_new_file(opcoes, backup_path=backup_dir / 'opcoes_form_insc.csv')
 
     # Importa listas de inscrições e cancelamentos e compila lista de usuários ativos
     inscricoes = usuarios.import_google_spreadsheet(cfg['FORM_INSC']['ID_GSHEET'])
@@ -76,10 +77,9 @@ try:
     inscricoes_compilado_novos_codigos = usuarios.update_codigos_desativados(inscricoes_compilado, codigos_desativados)
 
     # Realiza backup dos dados provenientes dos formulários de inscrição e cancelamento
-    backup.backup_csv_new_file(opcoes, directory=backup_dir, filename='opcoes_form_insc.csv')
-    backup.backup_csv(inscricoes, backup_path=os.path.join(backup_dir, 'inscricoes.csv'))
-    backup.backup_csv(cancelamentos, backup_path=os.path.join(backup_dir, 'cancelamentos.csv'))
-    backup.backup_csv(inscricoes_compilado_novos_codigos, backup_path=os.path.join(backup_dir, 'inscricoes_compilado.csv'))
+    backup.backup_csv(inscricoes, backup_path=backup_dir / 'inscricoes.csv')
+    backup.backup_csv(cancelamentos, backup_path=backup_dir / 'cancelamentos.csv')
+    backup.backup_csv(inscricoes_compilado_novos_codigos, backup_path=backup_dir / 'inscricoes_compilado.csv')
 
     # # # # # # # # # # #
     # Importa as CATs
@@ -124,13 +124,13 @@ try:
                       acidentes.cat_uorg_local_acidente,
                       acidentes.cat_secao_cnae_local_acidente,
                       acidentes.cat_formatar_datas,
-                      acidentes.cat_formatar_identificadores,
                       acidentes.cat_identifica_recibo_raiz,
                       acidentes.cat_mantem_recibo_ultima_reabertura,
                       cat_atribui_fatores_risco_partial,
                       acidentes.cat_compila_fatores_risco,
                       acidentes.cat_atribui_consequencia,
-                      acidentes.cat_inserir_descricoes
+                      acidentes.cat_inserir_descricoes,
+                      acidentes.cat_formatar_identificadores,
                       ]
 
     cats_tratadas = reduce(lambda x, y: y(x), functions_list, cats)
@@ -154,7 +154,7 @@ try:
         cats_filtradas = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial, cats_tratadas)
 
         if os.path.exists(log_alertas_usuario):
-            ja_notificadas = pd.read_csv(log_alertas_usuario)  # TODO
+            ja_notificadas = pd.read_csv(log_alertas_usuario)
             ja_notificadas_recibo = (ja_notificadas[ja_notificadas.email == destinatario['E-mail']]
                                      .meta_nr_recibo
                                      .to_list())
@@ -349,3 +349,6 @@ except Exception as error:
                      port=cfg['PORT'])
 
     raise Exception('error')
+
+if __name__ == '__main__':
+    pass

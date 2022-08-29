@@ -10,8 +10,7 @@ from jinja2 import Template
 import weasyprint
 import shutil
 from . import helpers_consequencia
-from .helpers_format_identificadores import (format_cnae, format_cbo, format_nrinsc, format_cpf,
-                                             format_localtabgeral_nrinsc, format_nrinsc_estab_local_acidente)
+from .helpers_format_identificadores import format_cnae, format_cbo, format_nrinsc, format_cpf
 
 
 def cat_extrair() -> pd.DataFrame:
@@ -20,7 +19,7 @@ def cat_extrair() -> pd.DataFrame:
     Returns:
         DataFrame com os dados das novas CATs
     """
-    log_execucoes_path = Path('../data/log/log_execucoes.csv')
+    log_execucoes_path = Path('../data/log/log_execucoes.csv') # Todo
     if os.path.exists(log_execucoes_path):
         log_execucoes = pd.read_csv(log_execucoes_path)
         ultima_cat = log_execucoes.ultima_cat_baixada.fillna('').max()
@@ -161,8 +160,8 @@ def cat_uorg_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
     """
     df = df_cat.copy()
 
-    uorgs = pd.read_csv(f'../data/input/aux_tables/uorg.csv', dtype='object').set_index('CDMunicipio').to_dict()['NRUORG']
-    uf_uorgs = pd.read_csv(f'../data/input/aux_tables/uf_uorg.csv', dtype='object').set_index('CDUORG').to_dict()['SGUF']
+    uorgs = pd.read_csv(f'../data/input/aux_tables/uorg.csv', dtype='object').set_index('CDMunicipio').to_dict()['NRUORG']  # TODO
+    uf_uorgs = pd.read_csv(f'../data/input/aux_tables/uf_uorg.csv', dtype='object').set_index('CDUORG').to_dict()['SGUF']  # TODO
 
     df['uorg_local_acidente'] = df['municipio_local_acidente'].map(uorgs)
     df['uf_uorg_local_acidente'] = df['uorg_local_acidente'].map(uf_uorgs)
@@ -181,7 +180,7 @@ def cat_secao_cnae_local_acidente(df_cat: pd.DataFrame) -> pd.DataFrame:
     """
     df = df_cat.copy()
 
-    secao_cnae = (pd.read_csv(f'../data/input/aux_tables/cnae_secao.csv', dtype='object')
+    secao_cnae = (pd.read_csv(f'../data/input/aux_tables/cnae_secao.csv', dtype='object')   # TODO
                   .set_index('CDSubclasse')
                   .to_dict()['CDSecao'])
 
@@ -224,9 +223,10 @@ def cat_formatar_identificadores(df_cat: pd.DataFrame) -> pd.DataFrame:
 
     df['codcbo'] = df.codcbo.apply(lambda x: format_cbo(x) if not pd.isna(x) else np.NaN)
 
-    df['nrinsc'] = df.apply(format_nrinsc, axis=1)
-    df['localtabgeral_nrinsc'] = df.apply(format_localtabgeral_nrinsc, axis=1)
-    df['nrinsc_estab_local_acidente'] = df.apply(format_nrinsc_estab_local_acidente, axis=1)
+    df['nrinsc'] = df.apply(lambda x: format_nrinsc(x['tpinsc'], x['nrinsc']), axis=1)
+    df['localtabgeral_nrinsc'] = df.apply(lambda x: format_nrinsc(x['localtabgeral_tpinsc'], x['localtabgeral_nrinsc']), axis=1)
+    df['nrinsc_estab_local_acidente'] = df.apply(lambda x: format_nrinsc(x['tpinsc_estab_local_acidente'], x['nrinsc_estab_local_acidente']), axis=1)
+
     df['cpftrab'] = df.cpftrab.apply(lambda x: format_cpf(x) if not pd.isna(x) else np.NaN)
 
     return df
@@ -330,8 +330,8 @@ def cat_compila_fatores_risco(df_cat: pd.DataFrame) -> pd.DataFrame:
     df = df_cat.copy()
 
     def compila_fr_ordenados_sem_duplicidades(s: pd.Series):
-        conjunto = {s['codsitgeradora_fr'], s['codagntcausador_fr'], s['dsclesao_fr'], s['codcid_fr'],
-                    s['codcidCategoria_fr']}
+        conjunto = {s['codsitgeradora_fr'], s['codagntcausador_fr'], s['dsclesao_fr'],
+                    s['codcid_fr'], s['codcidCategoria_fr']}
         lista_sem_nulos = [x for x in conjunto if pd.isna(x) is False]
         return sorted(lista_sem_nulos)
 
@@ -416,9 +416,9 @@ def cat_inserir_descricoes(df_cat: pd.DataFrame) -> pd.DataFrame:
 
     for col, csv in cols_to_map.items():
         if col in cols_integer_as_index:
-            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}')
+            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}')   # TODO
         else:
-            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}', dtype='object')
+            df_map = pd.read_csv(f'../data/input/aux_tables/{csv}', dtype='object')   # TODO
         dict_map = dict(zip(df_map.iloc[:, 0], df_map.iloc[:, 1]))
         df[f'ds_{col}'] = df[col].map(dict_map)
 
@@ -477,7 +477,7 @@ def cat_tabela_resumo(df_cat: pd.DataFrame) -> pd.DataFrame:
     df.Consequencia = df.Consequencia.apply(lambda x: '<br>'.join(x))
 
     def map_fr(lista):
-        map_dict = (pd.read_csv(f'../data/input/aux_tables/fator_risco.csv', dtype='object')
+        map_dict = (pd.read_csv(f'../data/input/aux_tables/fator_risco.csv', dtype='object')   # TODO
                     .set_index('CDFatorAmbiental')['DSFatorAmbiental']
                     .to_dict())
         lista_mapped = [f'{elemento} - {map_dict[elemento]}' for elemento in lista]
