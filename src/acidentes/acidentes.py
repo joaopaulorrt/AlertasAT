@@ -24,20 +24,26 @@ def cat_extrair(log_execucoes: Path) -> pd.DataFrame:
     Returns:
         DataFrame com os dados das novas CATs
     """
+    sete_dias_atras = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')
+
     if os.path.exists(log_execucoes):
         df_log_execucoes = pd.read_csv(log_execucoes)
         ultima_cat = df_log_execucoes.ultima_cat_baixada.fillna('').max()
-        query = f"""
-
-            SELECT *
-            FROM [DBCAT].[dbo].[TBCAT_eSocial]
-            WHERE meta_nr_recibo > '{ultima_cat}'
-            """
+        if ultima_cat != '':
+            query = f"""
+                SELECT *
+                FROM [DBCAT].[dbo].[TBCAT_eSocial]
+                WHERE meta_nr_recibo > '{ultima_cat}'
+                """
+        else:
+            query = f"""
+                SELECT *
+                FROM [DBCAT].[dbo].[TBCAT_eSocial]
+                WHERE LEFT(meta_row_key, 8) >= {sete_dias_atras}
+                """
 
     else:
-        sete_dias_atras = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')
         query = f"""
-    
             SELECT *
             FROM [DBCAT].[dbo].[TBCAT_eSocial]
             WHERE LEFT(meta_row_key, 8) >= {sete_dias_atras}

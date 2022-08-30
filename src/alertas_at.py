@@ -7,6 +7,7 @@ Autor: João Paulo Reis Ribeiro Teixeira - joao.reis@economia.gov.br'
 from datetime import datetime
 import pandas as pd
 from pathlib import Path
+import os
 
 import backup
 import acidentes
@@ -123,17 +124,21 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
                          .fillna('Todas')
                          .sort_values(['UF', 'UORG', 'E-mail', ]))
 
-    envios = pd.read_csv(log_alertas_usuario)
-    envios.timestamp = pd.to_datetime(envios.timestamp)
-    envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
-    envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
+    if os.path.exists(log_alertas_usuario):
+        envios = pd.read_csv(log_alertas_usuario)
+        envios.timestamp = pd.to_datetime(envios.timestamp)
+        envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
+        envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
+    else:
+        envios_hj_count = pd.Series(name=f"Alertas enviados <br>em {dt_hoje_str}")
+        envios_hj_count.index.name = 'email'
 
-    resumo_alertas_hj = (resumo_inscricoes
-                         .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
-                         .fillna(0)
-                         .convert_dtypes())
+    df_resumo = (resumo_inscricoes
+                 .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
+                 .fillna(0)
+                 .convert_dtypes())
 
-    return resumo_alertas_hj
+    return df_resumo
 
 
 def log_alertas(log: Path, destinatario: pd.Series, cats: pd.DataFrame, sucesso: bool):
@@ -167,9 +172,12 @@ def log_execucao(log_execucoes, sucesso: bool, cats=None, log_alertas_usuario=No
 
     """
     if sucesso:
-        envios = pd.read_csv(log_alertas_usuario)
-        envios.timestamp = pd.to_datetime(envios.timestamp)
-        envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
+        if os.path.exists(log_alertas_usuario):
+            envios = pd.read_csv(log_alertas_usuario)
+            envios.timestamp = pd.to_datetime(envios.timestamp)
+            envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
+        else:
+            envios_hj = pd.DataFrame()
 
         ultima_cat = cats[cats.meta_nr_recibo == cats.meta_nr_recibo.max()]
 
