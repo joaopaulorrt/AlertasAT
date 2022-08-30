@@ -8,6 +8,8 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from time import sleep
+
 from jinja2 import Template
 
 
@@ -31,6 +33,7 @@ class EmailMessage:
         server.login(auth_user, password)
         server.sendmail(self.sender_email, self.destinatario, self.message.as_string())
         server.quit()
+        sleep(1)
 
 
 class EmailMessageHTML(EmailMessage):

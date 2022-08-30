@@ -1,5 +1,6 @@
 """Módulo com funções para extrair e tratar e salvar em PDF dados das CATs"""
 import functools
+from functools import reduce, partial
 import pandas as pd
 from datetime import datetime, timedelta
 import sqlalchemy
@@ -10,6 +11,7 @@ from jinja2 import Template
 import weasyprint
 import shutil
 from . import helpers_consequencia
+from . import helpers_vpn as vpn
 from .helpers_format_identificadores import format_cnae, format_cbo, format_nrinsc, format_cpf
 
 
@@ -431,6 +433,99 @@ def cat_inserir_descricoes(df_cat: pd.DataFrame, aux_tables_dir: Path) -> pd.Dat
     return df
 
 
+def cat_inserir_descricoes_fatores_risco(df_cat: pd.DataFrame, aux_tables_dir: Path) -> pd.DataFrame:
+    """ Insere colunas com as descrições dos códigos numéricos dos fatores de risco.
+
+    Args:
+        df_cat: DataFrame com os dados das CATs.
+        aux_tables_dir: Path do diretório contendo os arquivos .csv das tabelas auxiliares.
+
+    Returns:
+        DataFrame com os dados CATs tratados
+    """
+    df = df_cat.copy()
+
+    def map_fr(lista):
+        map_dict = (pd.read_csv(aux_tables_dir / 'fator_risco.csv', dtype='object')
+                    .set_index('CDFatorAmbiental')['DSFatorAmbiental']
+                    .to_dict())
+        lista_mapped = [f'{elemento} - {map_dict[elemento]}' for elemento in lista]
+        return '<br>'.join(lista_mapped)
+
+    df['CDFatorAmbiental'] = df['CDFatorAmbiental'].apply(map_fr)
+
+    return df
+
+
+def cat_tratadas(vpn_path: str,
+                 user: str,
+                 password: str,
+                 url_test_connection: str,
+                 log_execucoes: Path,
+                 aux_tables_dir: Path,
+                 fatores_risco: dict):
+
+    # Tenta conectar à VPN
+    vpn.try_connection_forticlient_vpn(vpn_path=vpn_path,
+                                       user=user,
+                                       password=password,
+                                       url_test_connection=url_test_connection)
+
+    # Importa novas CATs
+    cats = cat_extrair(log_execucoes=log_execucoes)
+
+    # Erro por ausência de carga de novas CATs
+    if cats.empty:
+        if os.path.exists(log_execucoes):
+            df_log_execucoes = pd.read_csv(log_execucoes, dtype='object').fillna('')
+            ultima_cat = df_log_execucoes[df_log_execucoes.ultima_cat_baixada == df_log_execucoes.ultima_cat_baixada.max()].squeeze()
+            sem_cat_msg = (
+                'Não há novos registros no banco de dados das CATs.'
+                f' A CAT {ultima_cat.ultima_cat_baixada}, de {ultima_cat.dt_ultima_cat_baixada}, é a mais recente no banco.')
+        else:
+            sem_cat_msg = 'Não há novos registros no banco de dados das CATs referentes aos últimos 7 dias.'
+
+        raise Exception(sem_cat_msg)
+
+    # Trata as CATs
+    cat_atribui_fatores_risco_partial = partial(cat_atribui_fatores_risco,
+                                                fatores_params_reshaped=fatores_risco)
+
+    cat_uorg_local_acidente_partial = partial(cat_uorg_local_acidente,
+                                              uorgs=aux_tables_dir/'uorg.csv',
+                                              uf_uorgs=aux_tables_dir/'uf_uorg.csv')
+
+    cat_secao_cnae_local_acidente_partial = partial(cat_secao_cnae_local_acidente,
+                                                    secoes_cnae=aux_tables_dir/'cnae_secao.csv')
+
+    cat_inserir_descricoes_partial = partial(cat_inserir_descricoes, aux_tables_dir=aux_tables_dir)
+
+    cat_inserir_descricoes_fatores_risco_partial = partial(cat_inserir_descricoes_fatores_risco, aux_tables_dir=aux_tables_dir)
+
+    functions_list = [cat_converter_inteiros,
+                      cat_converter_datas,
+                      cat_formatar_horas,
+                      cat_formatar_strings,
+                      cat_cid_uppercase,
+                      cat_novas_colunas,
+                      cat_uorg_local_acidente_partial,
+                      cat_secao_cnae_local_acidente_partial,
+                      cat_formatar_datas,
+                      cat_identifica_recibo_raiz,
+                      cat_mantem_recibo_ultima_reabertura,
+                      cat_atribui_fatores_risco_partial,
+                      cat_compila_fatores_risco,
+                      cat_atribui_consequencia,
+                      cat_inserir_descricoes_partial,
+                      cat_inserir_descricoes_fatores_risco_partial,
+                      cat_formatar_identificadores,
+                      ]
+
+    cats_tratadas = reduce(lambda x, y: y(x), functions_list, cats)
+
+    return cats_tratadas
+
+
 def cat_to_pdf(series: pd.Series,
                html_template: Path,
                logo: Path,
@@ -444,6 +539,8 @@ def cat_to_pdf(series: pd.Series,
         output_dir: Diretório de destino do arquivo PDF
 
     """
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
     nr_recibo = series.meta_nr_recibo
 
     html_path = output_dir / f'{nr_recibo}.html' if output_dir else f'{nr_recibo}.html'
@@ -467,12 +564,11 @@ def cat_to_pdf(series: pd.Series,
         os.remove(html_path)
 
 
-def cat_tabela_resumo(df_cat: pd.DataFrame, fatores_risco: Path) -> pd.DataFrame:
+def cat_tabela_resumo(df_cat: pd.DataFrame) -> pd.DataFrame:
     """Gera tabela com os principais campos da CAT, para ser anexada no corpo do email do alerta.
 
     Args:
         df_cat: DataFrame com os dados das CATs.
-        fatores_risco: Path do arquivo .csv contendo as descrições dos fatores de risco.
 
     Returns:
         DataFrame com os dados CATs tratados
@@ -482,15 +578,6 @@ def cat_tabela_resumo(df_cat: pd.DataFrame, fatores_risco: Path) -> pd.DataFrame
     df = df_cat[alerta_cols].copy()
 
     df.Consequencia = df.Consequencia.apply(lambda x: '<br>'.join(x))
-
-    def map_fr(lista):
-        map_dict = (pd.read_csv(fatores_risco, dtype='object')
-                    .set_index('CDFatorAmbiental')['DSFatorAmbiental']
-                    .to_dict())
-        lista_mapped = [f'{elemento} - {map_dict[elemento]}' for elemento in lista]
-        return '<br>'.join(lista_mapped)
-
-    df['CDFatorAmbiental'] = df['CDFatorAmbiental'].apply(map_fr)
 
     df["Local do Acidente"] = df["ds_municipio_local_acidente"] + '/' + df["sguf_local_acidente"]
 

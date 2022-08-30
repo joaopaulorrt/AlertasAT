@@ -22,7 +22,7 @@ def amputacao_exceto_dedo(s: pd.Series):
     cond_codcidCategoria = s['codcidCategoria'] in ['S08', 'S18', 'S48', 'S58', 'S68', 'S78', 'S88', 'S98', 'T05']
     cond_codcid_not = s['codcid'] not in ['S680', 'S681', 'S682', 'S981', 'S982']
 
-    if (cond_dsclesao and cond_codparteating_not) or (cond_codcidCategoria and cond_codcid_not):
+    if (cond_dsclesao and cond_codparteating_not) or (cond_codcidCategoria and cond_codcid_not and cond_codparteating_not):
         return 'Amputação (exceto dedo)'
     else:
         return None
@@ -57,7 +57,7 @@ def fratura_exceto_dedo(s: pd.Series):
                                           'S661', 'S663', 'S665',
                                           'S670', ]
 
-    if (cond_dsclesao and cond_codparteating_not) or (cond_codcidCategoria and cond_codcid_not):
+    if (cond_dsclesao and cond_codparteating_not) or (cond_codcidCategoria and cond_codcid_not and cond_codparteating_not):
         return 'Fratura (exceto dedo)'
     else:
         return None

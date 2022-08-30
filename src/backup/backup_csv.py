@@ -69,6 +69,8 @@ def backup_csv_append(backup_path: str | Path, new_line_data: dict):
     """
     if backup_path.suffix != '.csv':
         raise ValueError('O argumento backup_path deve conter o diretório e nome do arquivo a ser salvo, incluindo o sufixo .csv')
+    Path(backup_path).parent.mkdir(parents=True, exist_ok=True)
+
     cabecalho = ','.join(f'"{w}"' for w in new_line_data.keys()) + "\n"
     linha = ','.join(f'"{w}"' for w in new_line_data.values()) + "\n"
 

@@ -48,8 +48,16 @@ def compila_inscricoes(df_inscricao: pd.DataFrame, df_cancelamento: pd.DataFrame
     return compilado[compilado.vigente == 1]
 
 
-def adiciona_uf_uorgs(usuarios: pd.DataFrame) -> pd.DataFrame:
-    df = usuarios.copy()
+def adiciona_uf_uorgs(df_usuarios: pd.DataFrame) -> pd.DataFrame:
+    """Adiciona a UF para os usuários que optaram por receber alertas por UORG
+
+    Args:
+        df_usuarios: DataFrame com os dados de inscrições
+
+    Returns:
+        DataFrame com os dados de inscrições atualizados
+    """
+    df = df_usuarios.copy()
 
     df['uf_uorg'] = df.UORG.str.extract(r'^([A-Z]{2})\s-')
     df['UF'] = df.UF.fillna(df.uf_uorg)
@@ -57,8 +65,17 @@ def adiciona_uf_uorgs(usuarios: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def update_codigos_desativados(usuarios: pd.DataFrame, codigos_desativados: dict) -> pd.DataFrame:
-    df = usuarios.copy()
+def update_codigos_desativados(df_usuarios: pd.DataFrame, codigos_desativados: dict) -> pd.DataFrame:
+    """Converte os códigos desativados presentes em inscrições antigas
+
+    Args:
+        df_usuarios: DataFrame com os dados de inscrições
+        codigos_desativados: Dicionário com os valores de conversão de códigos antigos
+
+    Returns:
+        DataFrame com os dados de inscrições atualizados
+    """
+    df = df_usuarios.copy()
 
     cols_to_update = ['Consequência do acidente', 'UORG', 'Fatores de risco']
     dict_update = [codigos_desativados['CONSEQUENCIA'],
@@ -70,3 +87,24 @@ def update_codigos_desativados(usuarios: pd.DataFrame, codigos_desativados: dict
             df[col] = df[col].str.replace(antigo, novo, regex=False)
 
     return df
+
+
+def usuarios(id_gsheet_insc: str, id_gsheet_canc: str, codigos_desativados: dict) -> pd.DataFrame:
+    """Compila lista de usuários ativos no Serviço de Alerta de Acidentes do Trabalho.
+
+    Args:
+        id_gsheet_insc: ID da Google spreadsheet contendo os dados de Inscrição
+        id_gsheet_canc: ID da Google spreadsheet contendo os dados de cancelamento
+        codigos_desativados: Dicionário com os valores de conversão de códigos antigos
+
+    Returns:
+        DataFrame com lista de usuários ativos no Serviço de Alerta de Acidentes do Trabalho
+    """
+    # Importa listas de inscrições e cancelamentos e compila lista de usuários ativos
+    inscricoes = import_google_spreadsheet(id_gsheet_insc)
+    cancelamentos = import_google_spreadsheet(id_gsheet_canc)
+    inscricoes_compilado = compila_inscricoes(df_inscricao=inscricoes, df_cancelamento=cancelamentos)
+    inscricoes_compilado_novos_codigos = update_codigos_desativados(inscricoes_compilado, codigos_desativados)
+    df_usuarios = adiciona_uf_uorgs(inscricoes_compilado_novos_codigos)
+
+    return df_usuarios

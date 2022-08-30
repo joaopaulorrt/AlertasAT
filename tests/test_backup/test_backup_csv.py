@@ -29,7 +29,7 @@ class TestBackupCSV:
         esperado = pd.DataFrame({'A': ['1', '2', '3', '4'],
                                  'B': ['1', '2', '3', '4']})
 
-        backup_path = os.path.join('temp', 'backup.csv')
+        backup_path = Path('temp/backup.csv')
         Path(os.path.dirname(backup_path)).mkdir(parents=True, exist_ok=True)
 
         last_backup.to_csv(backup_path, index=False, quoting=csv.QUOTE_NONNUMERIC)
@@ -52,7 +52,7 @@ class TestBackupCSV:
         esperado = pd.DataFrame({'A': ['1', '2', '3'],
                                  'B': ['1', '2', '3']})
 
-        backup_path = os.path.join('temp', 'backup.csv')
+        backup_path = Path('temp/backup.csv')
         Path(os.path.dirname(backup_path)).mkdir(parents=True, exist_ok=True)
 
         last_backup.to_csv(backup_path, index=False, quoting=csv.QUOTE_NONNUMERIC)
@@ -74,21 +74,20 @@ class TestBackupCSVNewFile:
         df_last_backup = pd.DataFrame({'A': ['1', '2', '3'],
                                        'B': ['1', '2', '3']})
 
-        backup_path = 'temp'
-        filename = 'test'
+        backup_path = Path('temp/backup.csv')
 
         # Salva backup
         Path(backup_path).mkdir(parents=True, exist_ok=True)
         backup_time = datetime.now().strftime("%Y-%m-%d T%H.%M.%S")
-        df_last_backup.to_csv(f'{os.path.join(backup_path, filename)} {backup_time}.csv',
+        df_last_backup.to_csv(backup_path.parent / f'{backup_path.stem} {backup_time}.csv',
                               index=False,
                               quoting=csv.QUOTE_NONNUMERIC)
         sleep(1)
 
         # Executa função
-        backup.backup_csv_new_file(df=df, filename=filename, directory=backup_path)
+        backup.backup_csv_new_file(df=df, backup_path=backup_path)
 
-        assert len(glob(f'{os.path.join(backup_path, filename)} *.csv')) == 2
+        assert len(glob(f'{backup_path.with_suffix("")} *.csv')) == 2
 
     def teste_sem_mudancas(self, del_temp_dir):
         """Testa se o backup deixa de ser realizado quando nada mudou"""
@@ -98,18 +97,17 @@ class TestBackupCSVNewFile:
         df_last_backup = pd.DataFrame({'A': ['1', '2', '3'],
                                        'B': ['1', '2', '3']})
 
-        backup_path = 'temp'
-        filename = 'test'
+        backup_path = Path('temp/backup.csv')
 
         # Salva backup
         Path(backup_path).mkdir(parents=True, exist_ok=True)
         backup_time = datetime.now().strftime("%Y-%m-%d T%H.%M.%S")
-        df_last_backup.to_csv(f'{os.path.join(backup_path, filename)} {backup_time}.csv',
+        df_last_backup.to_csv(backup_path.parent / f'{backup_path.name} {backup_time}.csv',
                               index=False,
                               quoting=csv.QUOTE_NONNUMERIC)
         sleep(1)
 
         # Executa função
-        backup.backup_csv_new_file(df=df, filename=filename, directory=backup_path)
+        backup.backup_csv_new_file(df=df, backup_path=backup_path)
 
-        assert len(glob(f'{os.path.join(backup_path, filename)} *.csv')) == 1
+        assert len(glob(f'{backup_path} *.csv')) == 1

@@ -1,7 +1,10 @@
 """Módulo com funções para filtrar a DataFrame de CATs tratada, de acordo com as preferências do usuário"""
 
 import re
+from functools import partial, reduce
+from pathlib import Path
 import pandas as pd
+import os
 
 
 def uf(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
@@ -133,3 +136,65 @@ def cnae(cats: pd.DataFrame, usuario: pd.Series) -> pd.DataFrame:
     lista_cnae = re.findall(r'(?:^|,\s)([A-Z]) -', usuario['Seção CNAE'])
     filtro_cnae = df['secao_cnae_local_acidente'].isin(lista_cnae)
     return df[filtro_cnae]
+
+
+def preferencias_usuario(cats: pd.DataFrame, usuario: pd.Series, log_alertas: Path):
+    """Filtra CATs de acordo com as preferências do usuário
+
+    Args:
+        cats: DataFrama com as CATs a serem filtradas
+        usuario: Pandas Series com as preferências dos usuários
+        log_alertas: Path do log contendo os alertas anteriormente enviados aos usuários
+
+    Returns:
+        DataFrama com as CATs filtradas
+    """
+    funcoes_filtra_cats = [uf,
+                           uorg,
+                           tpacid,
+                           consequencias,
+                           risco,
+                           cnae]
+
+    funcoes_filtra_cats_partial = [partial(function, usuario=usuario) for function in funcoes_filtra_cats]
+
+    cats_filtradas = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial, cats)
+
+    if os.path.exists(log_alertas):
+        ja_notificadas = pd.read_csv(log_alertas)
+        ja_notificadas_recibo = (ja_notificadas[ja_notificadas.email == usuario['E-mail']]
+                                 .meta_nr_recibo
+                                 .to_list())
+        cats_filtradas = cats_filtradas[~cats_filtradas.meta_nr_recibo.isin(ja_notificadas_recibo)]
+
+    return cats_filtradas
+
+
+def preferencias_coordenador(cats: pd.DataFrame, coordenador: pd.Series, log_alertas: Path):
+    """Filtra CATs de acordo com as preferências do coordenador
+
+    Args:
+        cats: DataFrama com as CATs a serem filtradas
+        coordenador: Pandas Series com as preferências dos coordenadores
+        log_alertas: Path do log contendo os alertas anteriormente enviados aos coordenadores
+
+    Returns:
+        DataFrama com as CATs filtradas
+    """
+    funcoes_filtra_cats = [tpacid,
+                           consequencias,
+                           risco,
+                           cnae]
+
+    funcoes_filtra_cats_partial = [partial(function, usuario=coordenador) for function in funcoes_filtra_cats]
+
+    cats_filtradas = reduce(lambda x, y: y(x), funcoes_filtra_cats_partial, cats)
+
+    if os.path.exists(log_alertas):
+        ja_notificadas = pd.read_csv(log_alertas)
+        ja_notificadas_recibo = (ja_notificadas[ja_notificadas.email == coordenador['E-mail']]
+                                 .meta_nr_recibo
+                                 .to_list())
+        cats_filtradas = cats_filtradas[~cats_filtradas.meta_nr_recibo.isin(ja_notificadas_recibo)]
+
+    return cats_filtradas

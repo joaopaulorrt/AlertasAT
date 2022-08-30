@@ -5,9 +5,10 @@ Envia alertas diários sobre a ocorrência de acidentes do trabalho aos Auditore
 Os alertas podem ser customizados pelo usuário, que pode definir a abrangência geográfica e o perfil dos 
 acidentes do trabalho para os quais serão enviados os alertas. 
 
-[Link para cadastro](https://forms.gle/eGjE2vTw8ngeNCBGA)
+Links para o usuário:
 
-[Link para cancelamento](https://forms.gle/eGjE2vTw8ngeNCBGA)
+ - [Link para cadastro](https://forms.gle/eGjE2vTw8ngeNCBGA)
+ - [Link para cancelamento](https://forms.gle/eGjE2vTw8ngeNCBGA)
 
 ## Histórico de lançamentos
 

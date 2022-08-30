@@ -43,6 +43,17 @@ class TestAmputacaoExcetoDedo:
         resultado = consequencia.amputacao_exceto_dedo(cat)
         assert resultado == esperado
 
+    def test_amputacao_dedo_cid2(self):
+        cat = pd.Series({'dsclesao': '000000000',
+                         'codparteating': '755070000',
+                         'codcidCategoria': 'S68',
+                         'codcid': 'S68'})
+
+        esperado = None
+        resultado = consequencia.amputacao_exceto_dedo(cat)
+        assert resultado == esperado
+
+
     def test_nao_amputacao(self):
         cat = pd.Series({'dsclesao': '000000000',
                          'codparteating': '000000000',
@@ -142,6 +153,16 @@ class TestFraturaExcetoDedo:
                          'codparteating': '000000000',
                          'codcidCategoria': 'S62',
                          'codcid': 'S625'})
+
+        esperado = None
+        resultado = consequencia.fratura_exceto_dedo(cat)
+        assert resultado == esperado
+
+    def test_fratura_dedo_cid2(self):
+        cat = pd.Series({'dsclesao': '000000000',
+                         'codparteating': '755070000',
+                         'codcidCategoria': 'S62',
+                         'codcid': 'S62'})
 
         esperado = None
         resultado = consequencia.fratura_exceto_dedo(cat)
