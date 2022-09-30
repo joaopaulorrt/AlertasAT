@@ -348,3 +348,5 @@ if __name__ == '__main__':
                          port=cfg['PORT'])
 
         raise Exception('error')
+
+    print('ok')
