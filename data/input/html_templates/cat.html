@@ -115,9 +115,9 @@
     
 <body>
 
-    <div class="logo"><img width=70 height=70 src={{ logo_path }}></div>
+    <div class="logo"><img width=55 height=55 src={{ logo_path }}></div>
     
-    <p style="font-size:21pt; text-align:center; font-weight: bold; margin: 0.2cm; line-height: 2.5;">Comunicação de Acidente de Trabalho</p>
+    <p style="font-size:19pt; text-align:center; font-weight: bold; margin: 0.2cm; line-height: 1.7;">Comunicação de Acidente de Trabalho</p>
 
     <div id="REGISTRO DA CAT">
         <p class="Divider">REGISTRO DA CAT</p> 
@@ -151,27 +151,18 @@
         
         <table>
             <tr>
-                <th style="width: 12cm">Número do recibo da CAT retificada</th>
-                <th class="hidden_filler"></th>
+                <th style="width: 6cm">CAT retificada</th>
+                <th style="width: 6cm">CAT original, em caso de reabertura ou comunicação de óbito</th>
             </tr>
             <tr>
                 <td class='dados_left'>{{ nrrecibo }}</td>
-            </tr>
-        </table>
-        
-        <table>
-            <tr>
-                <th style="width: 12cm">Número do recibo da CAT original, em caso de reabertura ou comunicação de óbito</th>
-                <th class="hidden_filler"></th>
-            </tr>
-            <tr>
                 <td class='dados_left'>{{ nrRecCatOrig }}</td>
             </tr>
         </table>
         
     </div>
     
-    <div id="ACIDENTE">
+    <div id="ACIDENTE" style="max-height: 19cm">
         <p class="Divider">ACIDENTE</p> 
 
         <table>
@@ -299,7 +290,16 @@
                 <th style="width: 2.5cm">Obervações do atestado</th>
             </tr>
             <tr>
-                <td class='dados_wrap'><div style="max-height:0.8cm; overflow:hidden;">{{ obsatestado }}</div></td>
+                <td class='dados_wrap'><div style="max-height:4cm; overflow:hidden;">{{ obsatestado }}</div></td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <th style="width: 2.5cm">Obervações da CAT</th>
+            </tr>
+            <tr>
+                <td class='dados_wrap'><div style="max-height:4cm; overflow:hidden;">{{ obsCAT }}</div></td>
             </tr>
         </table>
         

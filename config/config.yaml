@@ -52,4 +52,7 @@ PORT: 587
 
 # Remetente
 SENDER_EMAIL: 'cgfip.dsst@economia.gov.br'
+
+# Limite de anexos (CATs em PDF por e-mail)
+LIMITE_ANEXOS: 50
 ...

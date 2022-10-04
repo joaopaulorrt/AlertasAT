@@ -12,6 +12,14 @@ Links para o usuário:
 
 ## Histórico de lançamentos
 
+* 0.1.1
+    * Inclusão do campo 'Observações da CAT' nos anexos em formato .pdf
+    * Limitação do número máximo de anexos por e-mail
+    * Alerta aos usuários que recebem muitas notificações, sugerindo adotar critérios mais restritivos em suas preferências
+    * Melhorias no resumo diário do coordenador
+    * Correção de bugs
+  
+
 * 0.1.0 - Lançamento do serviço, em caráter experimental
 
 ## Meta

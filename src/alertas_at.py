@@ -33,9 +33,22 @@ def alerta_usuario(usuario: pd.Series,
         logo: Path da imagem a ser inserida no cabeçalho do e-mail
 
     """
-    anexos = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats.itertuples()]
+    # Se houver mais de 50 anexos, nenhum anexo é inserido
+    if len(cats) <= cfg['LIMITE_ANEXOS']:
+        anexos = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats.itertuples()]
+    else:
+        anexos = []
 
     cats_resumo_html = acidentes.cat_tabela_resumo(cats).to_html(index=False, escape=False)
+
+    msg_muitos_acid = (
+        'Os critérios selecionados durante a inscrição são muito abrangentes. '
+        'Considere mudar suas preferências para reduzir o número de acidentes recebidos diariamente. '
+        'Os anexos com as CATs em formato PDF são enviados somente se o número de acidentes for menor do que '
+        f'{cfg["LIMITE_ANEXOS"]}.'
+        )
+
+    alerta_muitos_acid = msg_muitos_acid if len(cats) > cfg['LIMITE_ANEXOS'] else ''
 
     campos_email = {'cats': cats_resumo_html,
                     'uf': usuario.fillna('-')['UF'],
@@ -43,7 +56,10 @@ def alerta_usuario(usuario: pd.Series,
                     'tpacid': usuario.fillna('-')['Tipo de acidente'],
                     'consequencia': usuario.fillna('-')['Consequência do acidente'],
                     'setores': usuario.fillna('-')['Seção CNAE'],
-                    'riscos': usuario.fillna('-')['Fatores de risco']}
+                    'riscos': usuario.fillna('-')['Fatores de risco'],
+                    'alerta_perfil': alerta_muitos_acid
+                    }
+
     msg_usuario = email_sender.EmailMessageHTML(destinatario=usuario['E-mail'],
                                                 sender_email=cfg['SENDER_EMAIL'],
                                                 assunto='Alerta de acidente do trabalho',
@@ -82,8 +98,13 @@ def alerta_coordenador(coordenador: pd.Series,
 
     """
     if not cats_coord.empty:
-        anexos_adm = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats_coord.itertuples()]
+        # Se houver mais de 50 anexos, nenhum anexo é inserido
+        if len(cats_coord) <= cfg['LIMITE_ANEXOS']:
+            anexos_adm = [cat_pdf_dir / f'{cat.meta_nr_recibo}.pdf' for cat in cats_coord.itertuples()]
+        else:
+            anexos_adm = []
         cats_resumo_html_adm = acidentes.cat_tabela_resumo(cats_coord).to_html(index=False, escape=False)
+
     else:
         anexos_adm = None
         cats_resumo_html_adm = None
@@ -128,7 +149,12 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
         envios = pd.read_csv(log_alertas_usuario)
         envios.timestamp = pd.to_datetime(envios.timestamp)
         envios_hj = envios[envios.timestamp.dt.date == datetime.now().date()]
-        envios_hj_count = envios_hj.groupby('email').size().rename(f"Alertas enviados <br>em {dt_hoje_str}")
+        envios_hj_count = (envios_hj
+                           .groupby(['email', 'status'])
+                           .size()
+                           .reset_index()
+                           .rename(columns={0: f"Acidentes <br>em {dt_hoje_str}", 'status': "Status do envio"})
+                           )
     else:
         envios_hj_count = pd.Series(name=f"Alertas enviados <br>em {dt_hoje_str}")
         envios_hj_count.index.name = 'email'
@@ -136,7 +162,9 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
     df_resumo = (resumo_inscricoes
                  .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
                  .fillna(0)
-                 .convert_dtypes())
+                 .convert_dtypes()
+                 .loc[:, ['UF', 'E-mail', 'UORG', f'Alertas enviados <br>em {dt_hoje_str}', 'Status do envio']]
+                 )
 
     return df_resumo
 

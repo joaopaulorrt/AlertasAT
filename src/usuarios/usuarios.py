@@ -34,6 +34,10 @@ def compila_inscricoes(df_inscricao: pd.DataFrame, df_cancelamento: pd.DataFrame
     df_inscricao.Timestamp = pd.to_datetime(df_inscricao.Timestamp, format='%d/%m/%Y %H:%M:%S')
     df_cancelamento.Timestamp = pd.to_datetime(df_cancelamento.Timestamp, format='%d/%m/%Y %H:%M:%S')
 
+    # Padroniza e-mails para lidar com divergências de digitação
+    df_inscricao['E-mail'] = df_inscricao['E-mail'].str.lower().str.strip()
+    df_cancelamento['E-mail'] = df_cancelamento['E-mail'].str.lower().str.strip()
+
     ultima_inscricao = df_inscricao.sort_values('Timestamp', ascending=False).groupby('E-mail').head(1)
     ultimo_cancelamento = df_cancelamento.sort_values('Timestamp', ascending=False).groupby('E-mail').head(1)
 
