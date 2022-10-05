@@ -163,7 +163,7 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
                  .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
                  .fillna(0)
                  .convert_dtypes()
-                 .loc[:, ['UF', 'E-mail', 'UORG', f'Alertas enviados <br>em {dt_hoje_str}', 'Status do envio']]
+                 .loc[:, ['UF', 'E-mail', 'UORG', f'Acidentes <br>em {dt_hoje_str}', 'Status do envio']]
                  )
 
     return df_resumo

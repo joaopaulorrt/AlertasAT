@@ -556,15 +556,21 @@ def cat_to_pdf(series: pd.Series,
         shutil.copy(logo, output_dir / logo.name)
 
     if not os.path.isfile(pdf_path):
+        # Tratamento de dados para apresentação no PDF
         series = series.fillna('N/A')
+        if series.idade_DTAcidente != 'N/A':
+            series['idade_DTAcidente'] = int(series.idade_DTAcidente)
 
+        # carrega template html
         with open(html_template, 'r', encoding='utf-8') as f:
             template = Template(f.read())
 
+        # Preenche o template com os dados da CAT
         cat_html = template.render({col: series[col] for col in series.index} | {'logo_path': logo.name})
         with open(html_path, 'w', encoding="utf-8") as file:
             file.write(cat_html)
 
+        # Transforma o html em pdf
         weasyprint.HTML(html_path, encoding="utf-8").write_pdf(pdf_path)
 
         os.remove(html_path)
