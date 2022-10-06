@@ -1,4 +1,5 @@
 """Módulo com funções para extrair e tratar e salvar em PDF dados das CATs"""
+import filecmp
 import functools
 from functools import reduce, partial
 import pandas as pd
@@ -552,7 +553,11 @@ def cat_to_pdf(series: pd.Series,
     html_path = output_dir / f'{nr_recibo}.html' if output_dir else f'{nr_recibo}.html'
     pdf_path = output_dir / f'{nr_recibo}.pdf' if output_dir else f'{nr_recibo}.pdf'
 
-    if not os.path.isfile(output_dir / logo.name):
+    # Copia a logo para o diretório de destino, de modo a permitir a geração do pdf
+    if os.path.isfile(output_dir / logo.name):
+        if not filecmp.cmp(logo, output_dir / logo.name, shallow=True):
+            shutil.copy(logo, output_dir / logo.name)
+    else:
         shutil.copy(logo, output_dir / logo.name)
 
     if not os.path.isfile(pdf_path):

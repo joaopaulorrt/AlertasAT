@@ -8,6 +8,7 @@
 alertas_at.bat
 /src/alertas_at.bat
 /src/alertas_at_testes.ipynb
+*.ipynb
 
 # Clutter
 /venv/

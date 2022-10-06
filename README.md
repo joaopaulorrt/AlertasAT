@@ -12,6 +12,12 @@ Links para o usuário:
 
 ## Histórico de lançamentos
 
+* 0.1.2
+    * PDFs gerados para encaminhamento em anexo passam a ser apagadoa ao fim da rotina
+    * Melhorias no resumo diário do coordenador
+    * Correção de bugs
+
+
 * 0.1.1
     * Inclusão do campo 'Observações da CAT' nos anexos em formato .pdf
     * Limitação do número máximo de anexos por e-mail

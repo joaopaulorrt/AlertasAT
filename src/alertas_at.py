@@ -156,8 +156,7 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
                            .rename(columns={0: f"Acidentes <br>em {dt_hoje_str}", 'status': "Status do envio"})
                            )
     else:
-        envios_hj_count = pd.Series(name=f"Alertas enviados <br>em {dt_hoje_str}")
-        envios_hj_count.index.name = 'email'
+        envios_hj_count = pd.DataFrame(columns=['email', 'Status do envio', f"Acidentes <br>em {dt_hoje_str}"])
 
     df_resumo = (resumo_inscricoes
                  .merge(envios_hj_count, how='left', left_on='E-mail', right_on='email')
@@ -165,6 +164,8 @@ def resumo_alertas_hj(usuarios: pd.DataFrame, log_alertas_usuario: Path) -> pd.D
                  .convert_dtypes()
                  .loc[:, ['UF', 'E-mail', 'UORG', f'Acidentes <br>em {dt_hoje_str}', 'Status do envio']]
                  )
+
+    df_resumo['Status do envio'] = df_resumo['Status do envio'].astype(str).str.replace('0', '-')
 
     return df_resumo
 
@@ -305,11 +306,12 @@ if __name__ == '__main__':
 
             # Gera PDF das CAT
             if not cats_filtradas.empty:
-                for index_cat, cat in cats_filtradas.iterrows():
-                    acidentes.cat_to_pdf(cat,
-                                         html_template=cat_html_template,
-                                         logo=logo_sit,
-                                         output_dir=cat_pdf_dir)
+                if len(cats_filtradas) <= cfg['LIMITE_ANEXOS']:
+                    for index_cat, cat in cats_filtradas.iterrows():
+                        acidentes.cat_to_pdf(cat,
+                                             html_template=cat_html_template,
+                                             logo=logo_sit,
+                                             output_dir=cat_pdf_dir)
 
                 # Notifica usuário e registra no log
                 try:
@@ -359,6 +361,11 @@ if __name__ == '__main__':
         # Registra log da execução
         log_execucao(log_execucoes, sucesso=True, cats=cats_tratadas, log_alertas_usuario=log_alertas_usuario)
 
+        # Deleta os PDF do diretório de CATs
+        pdfs = [file for file in os.listdir(cat_pdf_dir) if '.pdf' in file]
+        for pdf in pdfs:
+            os.remove(cat_pdf_dir / pdf)
+
     except Exception as error:
         log_execucao(log_execucoes, sucesso=False)
 
@@ -376,5 +383,3 @@ if __name__ == '__main__':
                          port=cfg['PORT'])
 
         raise Exception('error')
-
-    print('ok')
